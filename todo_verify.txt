@@ -1,0 +1,6 @@
+2021-01-29 this will match a entry in the todo_verify.txt and not be added
+2020-12-30 this does not have an entry in the todo_verify.txt and be added
+2020-12-30 first and last (non-leap) day of every year
+2020-12-30 last day of every month
+2020-12-30 last workday of every month
+2020-12-30 last day of every year

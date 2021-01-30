@@ -1,0 +1,599 @@
+#!/usr/local/bin/python3
+
+# py_recur: A recurring item generator for todo.txt.
+#
+# MIT license
+#
+# This script was based on ice_recur #1.6 by Robin Lee Powell, MIT license. That script mentioned some code
+# taken from: https://github.com/chuckbjones/todo.txt-cli-addons/blob/master/recu, license unknown.
+# Converted to Python3 by Jim DeVore to run on a Synology DS220j NAS that had packages for Python 3, but not
+# Ruby.
+#
+# Developed on Python 3.8.5
+#
+# See usage statement for more.
+#
+# Installation notes
+#
+#    This script goes in $TODO_DIR/todo.actions.d/
+#
+#    You put your entries in $TODO_DIR/py_recur.txt
+#
+#    Optionally schedule with /bin/todo.sh py_recur to your crontab, to run once a day
+#
+#    Install the non-standard libs below
+#    - pip3 install DateTime
+#    - pip3 install python-dateutil
+#    - pip3 install pathlib
+#    - pip3 install todotxtio
+#
+#    Synology DS220j
+#    - python3 installed in /usr/local/bin/python3
+#    - pip3 was not in the path; add a link in the path -- your results may vary
+#      this isn't the best solution for general use, but I'm the only python3 user on this machine
+#      sudo ln -s /volume1/homes/(USERNAME)/.local/bin/pip3 /usr/local/bin/pip3
+#    Windows subsystem 2 for linux: Ubuntu 20.04
+#    - python3 installed in /usr/bin/python3
+#    - link to keep a common bang line:
+#      sudo ln -s /usr/bin/python3 /usr/local/bin/python3
+
+import datetime 
+from datetime import date, timedelta
+import dateutil
+from dateutil import rrule
+from dateutil.parser import parse
+from dateutil.rrule import rrulestr, DAILY, WEEKLY, MONTHLY, YEARLY
+import dateutil.utils 
+import os
+from pathlib import Path
+import re
+import sys
+import time
+import todotxtio
+
+VERSION='2021-01-29'
+
+def check_schedule( schedstr, cur_day):
+                 
+   # parse out schedstr
+   # The current code requires ,<space> between parameters unless in parens, then just commas
+   #
+   # TODO: I wanted to tolerate variations in white space. I'm cheating and require parameters to be separated
+   # by comma and space unless in parens, then just commas. To do this, I need to split up commas unless in 
+   # parens. This code does this, but blows up things downstream.
+   #
+   #temp_list = re.split(',(?![^()]*\))', schedstr)
+   #schedstr_list = []
+   #for line in temp_list:
+   #   schedstr_list.append(str(line).strip())
+   
+   schedstr_list = schedstr.split(", ")
+
+   # parse repeat
+   # with one parameter, that parameter is returned
+   freq_str = schedstr.split(",", 1)[0]
+   schedstr_fmt = 'RRULE:FREQ=%s' % freq_str   
+   del schedstr_list[0]
+   if (not ((freq_str == "DAILY") or (
+             freq_str == "WEEKLY") or ( 
+             freq_str == "MONTHLY") or (
+             freq_str == "YEARLY"))):
+      print("FAILURE, problem with frequency parameter in py_recur.txt line: ", recur)
+      print("FAILURE, " + freq_str + " is not a valid frequency parameter")
+      exception_cleanup("")
+      exit(1)
+   
+   # don't want to grind out until 9999, so add an until clause if until or count are not defined
+   until_defined = False
+   count_defined = False
+   
+   # parse dtstart
+   try:
+      dtstart_found = False
+      for line in schedstr_list:
+         if "dtstart=parse" in line:
+            dtstart_str = re.search('"(.*)"', line).group(1)
+            scratch = 'DTSTART:%s\n' % dtstart_str
+            schedstr_fmt = scratch + schedstr_fmt
+            dtstart_found = True
+            if (not ((dtstart_str[0:7]).isnumeric()) and (
+                   dtstart_str[8:9] == "T") and (
+                   dtstart_str[9:15]).isnumeric()):
+               print("FAILURE, problem with dtstart string in py_recur.txt line: ", recur)
+               exception_cleanup("")
+               exit(1) 
+      if(not dtstart_found):
+         # don't start at 0 if a start isn't provided
+         scratch = 'DTSTART:20180101T000000\n'
+         schedstr_fmt = scratch + schedstr_fmt
+   except Exception as e:
+      print("FAILURE, problem with dtstart string in py_recur.txt line: ", recur)
+      exception_cleanup(e)
+      exit(1)  
+   
+   # parse byeaster
+   try:
+      for line in schedstr_list:
+         if "byeaster=" in line:
+            byeaster_str = re.search('byeaster=(.*)[^0-9]*', line).group(1)
+            scratch = ';BYEASTER=%s' % byeaster_str 
+            schedstr_fmt = schedstr_fmt + scratch       
+   except Exception as e:
+      print("FAILURE, problem with byeaster string in py_recur.txt line: ", recur)
+      exception_cleanup(e)
+      exit(1)  
+         
+   # parse interval
+   try:
+      interval_str = "1"
+      for line in schedstr_list:
+         if "interval=" in line:
+            interval_str = re.search('interval=(.*)[^0-9]*', line).group(1)
+            scratch = ';INTERVAL=%s' % interval_str 
+            schedstr_fmt = schedstr_fmt + scratch           
+            if (not interval_str.isnumeric()):
+               print("FAILURE, problem with interval string in py_recur.txt line: ", recur)
+               exception_cleanup("")
+               exit(1)  
+   except Exception as e:
+      print("FAILURE, problem with interval string in py_recur.txt line: ", recur)
+      exception_cleanup(e)
+      exit(1)  
+      
+   # parse wkst
+   try:
+      wkst_str = "SU"
+      for line in schedstr_list:
+         if "wkst=" in line:
+            wkst_str = re.search('wkst=(.*)[^A-Za-z]*', line).group(1)          
+            scratch = ';WKST=%s' % wkst_str 
+            schedstr_fmt = schedstr_fmt + scratch
+            if (not ((wkst_str == "SU") or (
+                      wkst_str == "MO") or (
+                      wkst_str == "TU") or (
+                      wkst_str == "WE") or (
+                      wkst_str == "TH") or (
+                      wkst_str == "FR") or (
+                      wkst_str == "SA"))):
+               print("FAILURE, problem with wkst string in py_recur.txt line: ", recur)
+               exception_cleanup("")
+               exit(1)
+   except Exception as e:
+      print("FAILURE, problem with wkst string in py_recur.txt line: ", recur)
+      exception_cleanup(e)
+      exit(1) 
+ 
+   # parse byweekday
+   try:
+      for line in schedstr_list:
+         if "byweekday=" in line:   
+            byweekday_str = re.search('byweekday=\((.*)\)', line).group(1) 
+            scratch = ';BYWEEKDAY=%s' % byweekday_str
+            schedstr_fmt = schedstr_fmt + scratch           
+   except Exception as e:
+      print("FAILURE, problem with byweekday string in py_recur.txt line: ", recur)
+      exception_cleanup(e)
+      exit(1) 
+      
+   # parse byweekno
+   try:
+      for line in schedstr_list:
+         if "byweekno=" in line:       
+            byweekno_str = re.search('byweekno=\((.*)\)', line).group(1) 
+            scratch = ';BYWEEKNO=%s' % byweekno_str
+            schedstr_fmt = schedstr_fmt + scratch
+   except Exception as e:
+      print("FAILURE, problem with byweekno string in py_recur.txt line: ", recur)
+      exception_cleanup(e)
+      exit(1) 
+      
+   # parse bymonth
+   try:
+      for line in schedstr_list:
+         if "bymonth=" in line:
+            bymonth_str = re.search('\((.*?)\)', line).group(1)
+            scratch = ';BYMONTH=%s' % bymonth_str
+            schedstr_fmt = schedstr_fmt + scratch
+   except Exception as e:
+      print("FAILURE, problem with bymonth string in py_recur.txt line: ", recur)
+      exception_cleanup(e)
+      exit(1)     
+      
+   # parse bymonthday
+   try:
+      for line in schedstr_list:
+         if "bymonthday=" in line:
+            bymonthday_str = re.search('\((.*?)\)', line).group(1)
+            scratch = ';BYMONTHDAY=%s' % bymonthday_str
+            schedstr_fmt = schedstr_fmt + scratch
+   except Exception as e:
+      print("FAILURE, problem with bymonthday() string in py_recur.txt line: ", recur)
+      exception_cleanup(e)
+      exit(1)
+      
+   # parse byyearday
+   try:
+      for line in schedstr_list:
+         if "byyearday=" in line:
+            byyearday_str = re.search('\((.*?)\)', line).group(1)
+            scratch = ';BYYEARDAY=%s' % byyearday_str
+            schedstr_fmt = schedstr_fmt + scratch
+   except Exception as e:
+      print("FAILURE, problem with byyearday string in py_recur.txt line: ", recur)
+      exception_cleanup(e)
+      exit(1)
+      
+   # parse bysetpos
+   try:
+      for line in schedstr_list:
+         if "bysetpos=" in line:
+            bysetpos_str = re.search('bysetpos=(.*)[^0-9]*', line).group(1)
+            scratch = ';BYSETPOS=%s' % bysetpos_str
+            schedstr_fmt = schedstr_fmt + scratch
+   except Exception as e:
+      print("FAILURE, problem with bysetpos string in py_recur.txt line: ", recur)
+      exception_cleanup(e)
+      exit(1)
+      
+   # parse count
+   try:
+      for line in schedstr_list:
+         if "count=" in line:
+            count_str = (re.search('=(.*)', line).group(1))
+            scratch = ';COUNT=%s' % count_str
+            schedstr_fmt = schedstr_fmt + scratch
+            count_defined = True
+            if (not (count_str.isnumeric())):
+               print("FAILURE, problem with count string in py_recur.txt line: ", recur)
+               exception_cleanup("")
+               exit(1)
+   except Exception as e:
+      print("FAILURE, problem with the count string in py_recur.txt line: ", recur)
+      exception_cleanup(e)
+      exit(1)
+   
+   # parse until
+   try:
+      for line in schedstr_list:
+         if "until=parse" in line:
+            until_str = re.search('"(.*)"', line).group(1)
+            scratch = ';UNTIL=%s' % until_str
+            schedstr_fmt = schedstr_fmt + scratch
+            until_defined = True
+            if (not ((until_str[0:7]).isnumeric()) and (
+                      until_str[8:9] == "T") and (
+                      until_str[9:15]).isnumeric()):
+               print("FAILURE, problem with until string in py_recur.txt line: ", recur)
+               exception_cleanup("")
+               exit(1)
+   except Exception as e:
+      print("FAILURE, problem with the until string in py_recur.txt line: ", recur)
+      exception_cleanup(e)
+      exit(1)
+
+   if (count_defined and until_defined):
+      # these keywords are mutually exlusive
+      print("FAILURE, count and until keywords are mutually exclusive, in py_recur.txt line: ", recur)
+      exception_cleanup("")
+      exit(1)
+      
+   if (not (count_defined or until_defined)):
+      # don't grind out to 9999. We aren't checking beyond cur_day, + one day is safe default
+      until_str = (cur_day + one_day).strftime("%Y%m%dT000000")   
+      scratch = ';UNTIL=%s' % until_str
+      schedstr_fmt = schedstr_fmt + scratch      
+   
+   try:                 
+      rule_list=list(rrule.rrulestr(schedstr_fmt))
+   
+   except Exception as e:
+      print("FAILURE, problem with rule generation in py_recur.txt line: ", recur)
+      print("FAILURE, generated rule: ", schedstr_fmt)
+      exception_cleanup(e)
+      exit(1)
+      
+   # look through generated rules; is cur_day in there?
+   # note odd shift in format:
+   # print(rule_list) entries: datetime.datetime(2020, 11, 14, 0, 0, tzinfo=tzutc())
+   # print(rule): 2020-11-14 00:00:00+00:00
+   if (opts_test):
+      print("py_recur.txt entry: ", recur, end="")
+      print("schedstr_fmt: ", schedstr_fmt)
+      print("rule_list: ")
+      for rule in rule_list:
+         print(rule)
+   for rule in rule_list:
+      if str(cur_day) == str(rule)[0:10]:
+         return(True)
+   return(False)
+
+def exception_cleanup(e):
+   if (len(e)>0):
+      exception_text = " , " + str(e)
+   else:
+      exception_text = ""
+   if int( os.path.getmtime( todo_file )) != orig_todo_day:
+      print("FAILURE, reverting todo.txt" + exception_text)
+      todotxtio.to_file(todo_file, orig_todo_list)
+   else:
+      print("FAILURE" + exception_text)
+
+def print_usage():
+   
+   print(
+   '''
+Usage
+-----
+todo.sh py_recur [-dr ][-f ][-h ][-ic ][-ip ][-oir=(name) ][-oit=(name) ][-osd=YYYY-MM-DD ][-sn ][-t ]
+
+-dr Show the resulting entries but do not add them to the todo file
+-f  Run even if we appear to have already run today
+-h  Show this text
+-ic By default, contexts \"@foo\" are counted as part of the text when deciding if ice_recur is about to add a
+    duplicate entry, so \"new entry\" would be added even if \"new entry @foo\" already exists.  If you use this
+    flag, those two will be considered the same entry and so it wouldn\'t be added. Additional contexts in the
+    todo.txt line are ignored.
+-ip Ignore_projects, By default, projects \"+foo\" are counted as part of the text when deciding if ice_recur is
+    about to add a duplicate entry, so \"new entry\" would be added even if \"new entry +foo\" already exists. If
+    you use this flag, those two will be considered the same entry and so it wouldn\'t be added. Additional projects in the todo.txt line are ignored.
+-oir Override the input rule file name, same directory as py_recur.txt, example: -oir=py_recur_text.txt
+-oit Override the input task file name, same directory as py_recur.txt, example: -oit=todo_test.txt
+-osd Override the start date, example, -osd=YYYY-MM-DD
+-t   Output additional text to the console useful test, including the dates generated for each rule
+
+Every entry that matches the current day will be added, as long as there is no other entry with the
+same text content.
+ 
+Recurrence Format; compiled into an RFC 2445 format
+---------------------------------------------------
+each parameter seperated by a comma and a space
+DAILY | WEEKLY | MONTHLY | YEARLY      this is the only required parameter 
+byeaster=x                             0 = Easter, -x or +x are offsets
+bymonthday=(x)                         restrict matches to days of the month, multiple? comma delineated
+bymonth=(x)                            restrict matches to numbered month(s), multiple? comma delineated
+bysetpos=x                             restrict matches to this interval within the set otherwise returned 
+byweekday=(x)                          multiple? seperate with commas                     
+byweekno=(x)                           multiple? seperate with commas 
+byyearday=(x)                          multiple? seperate with commas 
+count=x                                number of occurrences, mutually exclusive with until
+dtstart=parse("YYYYMMDDT000000")       YYYYMMDD is a formatted date, defaults to 20180101T000000 
+interval=x                             where x = 1 or more 
+until==parse("YYYYMMDDT000000")        YYYYMMDD is a formatted date, defaults to day after script runs
+wkst=SU | MO | TU | WE | TH | FR | SA  first two letters of the day, used to align byweekno   
+
+Entries look like:
+DAILY - (A) insert every day @context1 +project2
+DAILY, interval=3, dtstart=parse("20210101T000000") - (B) insert every third day starting 1/1/2021
+WEEKLY, byweekday=(MO) - (C) insert every Monday + project2
+WEEKLY, byweekday=(MO,TU,WE,TH,FR) - (A) insert every weekday @context2
+WEEKLY, byweekday=(FR) - (B) insert every other Friday @context1 @context2
+MONTHLY, bymonthday=15 - (C) insert monthly on the 15th
+MONTHLY, bymonthday=-1 - (A) insert the last day of the month
+YEARLY, interval=3, dtstart=parse("20180301T000000") - (A) insert every third yearr beginning 3/1/2018
+
+   '''
+       )   
+   
+# start main body of code, wrap with a try: except: block to catch things I didn't explicitly trap
+try:
+   opts_dry_run = False          # -dr
+   opts_force = False            # -f
+   opts_ignore_contexts = False  # -ic
+   opts_ignore_projects = False  # -ip
+   opts_override_input_rule = "" # -oir="(name)"
+   opts_override_input_task = "" # -oit="(name)"
+   opts_override_date = ""       # -osd="(YYYY-MM-TT)"
+   opts_test = False             # -t
+   
+   print("py_recur version " + str(VERSION))
+
+   for line in sys.argv[1:]:  
+
+      bad_opt = True
+      
+      if (line == "-dr"):
+         bad_opt = False
+         opts_dry_run = True
+         print("opts_dry_run")
+         
+      if (line == "-f"):
+         bad_opt = False
+         opts_force = True
+         print("opts_force")
+
+      if (line == "-h"):
+         print_usage()
+         exit(1)
+         
+      if (line == "-ic"):
+         bad_opt = False
+         opts_ignore_contexts = True
+         print("opts_ignore_contexts")
+         
+      if (line == "-ip"):
+         bad_opt = False
+         opts_ignore_projects = True
+         print("opts_ignore_projects")
+         
+      if ("-oir=" in line):
+         try:
+            bad_opt = False
+            opts_override_input_rule = re.search('-oir=(.*)[^A-Za-z0-9\.]*', line).group(1)  
+            print("opts_override_input_rule = " + opts_override_input_rule)
+         except Exception as e:
+            print("FAILURE, problem with -oir command line switch")
+            exception_cleanup(e)
+            exit(1) 
+            
+      if ("-oit=" in line):
+         try:
+            bad_opt = False
+            opts_override_input_task = re.search('-oit=(.*)[^A-Za-z0-9\.]*', line).group(1)  
+            print("opts_override_input_task = " + opts_override_input_task)
+         except Exception as e:
+            print("FAILURE, problem with -oit command line switch")
+            exception_cleanup(e)
+            exit(1) 
+
+      if ("-osd=" in line):
+         try:
+            bad_opt = False
+            opts_override_date = (line.split('='))[1]
+            print("opts_override_date = " + opts_override_date)
+         except Exception as e:
+            print("FAILURE, problem with -osd command line switch")
+            exception_cleanup(e)
+            exit(1)             
+            
+      if (line == "-t"):
+         bad_opt = False
+         opts_test = True
+         print("opts_test")
+
+      # allows the flexibility of running the script directly for test purposes
+      if ("py_recur" in line):
+         bad_opt = False
+      
+      # nothing recognized?
+      if (bad_opt):
+         print("")
+         print("unrecognized option: " + line)
+         print_usage()
+         exit(1)
+
+   if (opts_override_input_rule == ""):
+      recur_file = os.environ.get('TODO_DIR') + "/" + 'py_recur.txt'
+   else:
+      recur_file = os.environ.get('TODO_DIR') + "/" + opts_override_input_rule
+   
+   completed_file = os.environ.get('TODO_DIR') + "/" + '.py_recur_completed'
+   
+   one_day = datetime.timedelta(days=1)
+
+   # Get our recur entries
+   # Drop everything that looks like a comment or a blank
+   recur_entries = []
+   f = open(recur_file, "r")  
+   for line in f:
+      if((line[0] != '#') and (not line.isspace())):
+         recur_entries.append(line)
+      
+   # Read the todo's
+   if (opts_override_input_task == ""):
+      todo_file = os.environ.get('TODO_DIR') + "/" + 'todo.txt'
+   else:
+      todo_file = os.environ.get('TODO_DIR') + "/" + opts_override_input_task
+  
+   # corner case; this file will typically exist unless you are testing...
+   scratch = Path(todo_file)
+   if (not scratch.is_file()):
+      print("Failure, task file doesn't exist: " + todo_file)
+      exit(1)  
+
+   todo_list = todotxtio.from_file(todo_file)
+
+   orig_todo_list = todo_list
+      
+   # Get the last time the list was updated
+   orig_todo_day = datetime.date.fromtimestamp(os.path.getmtime(todo_file)) 
+
+   # What we will be adding
+   todo_list_new = []
+
+   # Get just the non-complete items
+   todo_list_trimmed = []
+   for todo_obj in todo_list:
+      if not todo_obj.completed:
+         todo_list_trimmed.append(todo_obj)
+  
+   # Calculate end day
+   if (opts_override_date == ""): 
+      # Today is the default end day
+      end_day = datetime.date.today() 
+   else:   
+      scratch = opts_override_date.split("-")
+      end_day = date(int(scratch[0]), int(scratch[1]), int(scratch[2]))
+
+   # Calculate start day
+   if (opts_override_date == ""): 
+      # Start where we left off unless opts_dry_run
+      if (os.path.exists(completed_file) and (not opts_force)):
+         start_day = datetime.date.fromtimestamp(os.path.getmtime(completed_file)) + one_day
+         if not opts_dry_run:
+            if (start_day > end_day):
+               print("py_recur has already run today; if you think this is in error, use the -f option.  Exiting.")
+               exit(1)
+      else:
+         start_day = datetime.date.today()
+   else:
+      start_day = end_day - one_day
+      
+   # loop over days
+   cur_day = start_day                               
+   while(cur_day <= end_day):  
+      print("Processing day...", cur_day)   
+      for recur in recur_entries:
+         # remove CRLF for prettier exception printing
+         recur.replace('\n', ' ').replace('\r', '')
+         scratch = recur.split(" - ", 1)
+         schedstr = scratch[0]
+         taskstr = scratch[1] 
+         if (check_schedule(schedstr, cur_day)):
+            print('- Recur matches %s: %s - %s' % (cur_day, schedstr, taskstr), end='')
+            # turn the taskstr into an object for ease of comparison
+            taskstr_objs = todotxtio.from_string(taskstr)
+            todo_obj_dupe = False
+            for todo_obj in todo_list_trimmed:                   
+               #evaluate text                     
+               dupe_text = False
+               if (todo_obj.text == taskstr_objs[0].text):
+                  dupe_text = True
+               # evaluate projects; is the taskstr a subset?
+               dupe_projects = False
+               if (set(taskstr_objs[0].projects).issubset(set(todo_obj.projects))):
+                  dupe_projects = True        
+               # evaluate contexts; is the taskstr a subset?
+               dupe_contexts = False
+               if (set(taskstr_objs[0].contexts).issubset(set(todo_obj.contexts))):
+                  dupe_contexts = True                     
+               if (dupe_text):
+                  if ((opts_ignore_projects and opts_ignore_contexts) or
+                      ((not opts_ignore_projects) and (dupe_projects)) or
+                      ((not opts_ignore_contexts) and (dupe_contexts))):
+                     print('    - Duplicate task exists: ' + taskstr, end='')   
+                     todo_obj_dupe = True
+                     break
+            # end loop over trimmed todo's against recur entry
+            if (not todo_obj_dupe):
+               print('    - No duplicate found for ' + taskstr, end='')
+               todo_obj = taskstr_objs[0]
+               todo_obj.creation_date = str(start_day)
+               print('    - Adding ' + str(todo_obj))
+               todo_list_new.append(todo_obj) 
+         # end schedstr match block    
+      # end loop over recur entries block
+        
+      # multi-day runs can create duplicates, prevent by adding
+      # the additions to the list of non-complete items; it may
+      # create duplicates there, but we kick out of the search
+      # on the first duplicate
+      for todo_obj in todo_list_new:
+         todo_list_trimmed.append(todo_obj)
+         
+      cur_day = cur_day + one_day
+   # end loop over cur_day block
+   if opts_dry_run:
+      print("\n\nIn dry run mode; here's the entries we would be adding:\n\n")
+      for todo_obj in todo_list_new:
+         print(todo_obj)
+   else:
+      print("\n\nHere's the entries we're adding:\n\n")
+      for todo_obj in todo_list_new:
+         print(todo_obj)
+         todo_list.append(todo_obj)
+      todotxtio.to_file(todo_file, todo_list)
+      Path(str(completed_file)).touch()
+
+except Exception as e:
+   exception_cleanup(e)
+   exit(1)
