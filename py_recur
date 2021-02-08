@@ -49,9 +49,9 @@ from pathlib import Path
 import re
 import sys
 import time
-import todotxtio
+import todotxtio as basetodotxtio
 
-VERSION='2021-01-29'
+VERSION='2021-02-07'
 
 def check_schedule( schedstr, cur_day):
                  
@@ -372,7 +372,67 @@ MONTHLY, bymonthday=-1 - (A) insert the last day of the month
 YEARLY, interval=3, dtstart=parse("20180301T000000") - (A) insert every third yearr beginning 3/1/2018
 
    '''
-       )   
+       )  
+   
+# replacement for todotxtio's defective from_string
+def from_string_patched(string):
+    """Load a todo list from a string.
+
+    :param str string: The string to parse
+    :rtype: list
+    """
+    todos = []
+
+    for line in string.strip().splitlines():
+        line = line.strip()
+
+        todo_pre_data = todo_data_regex.match(line)
+
+        todo = Todo()
+
+        # pre-group indexes don't change if completed or not
+        if todo_pre_data:
+            todo.completed = todo_pre_data.group(1) == 'x'
+            
+            if todo.completed:
+                if todo_pre_data.group(2):
+                    todo.completion_date = todo_pre_data.group(2)
+
+            todo.priority = todo_pre_data.group(3)
+            
+            todo.creation_date = todo_pre_data.group(4)            
+
+            text = todo_data_regex.sub('', line).strip()
+
+        else:
+
+            text = line
+
+        todo_projects = todo_project_regex.findall(text)
+
+        if len(todo_projects) > 0:
+            todo.projects = todo_projects
+            text = todo_project_regex.sub('', text).strip()
+
+        todo_contexts = todo_context_regex.findall(text)
+
+        if len(todo_contexts) > 0:
+            todo.contexts = todo_contexts
+            text = todo_context_regex.sub('', text).strip()
+
+        todo_tags = todo_tag_regex.findall(text)
+
+        if len(todo_tags) > 0:
+            for todo_tag in todo_tags:
+                todo.tags[todo_tag[0]] = todo_tag[1]
+
+            text = todo_tag_regex.sub('', text).strip()
+
+        todo.text = text
+        
+        todos.append(todo)
+
+    return todos
    
 # start main body of code, wrap with a try: except: block to catch things I didn't explicitly trap
 try:
@@ -386,7 +446,29 @@ try:
    opts_test = False             # -t
    
    print("py_recur version " + str(VERSION))
-
+   
+   # replace todotxtio's from_string with mine
+   todotxtio = basetodotxtio
+   todotxtio.from_string = from_string_patched
+   
+   # these are used in todotxtio, but outside of methods
+   __all__ = [
+    'from_dicts',
+    'from_stream',
+    'from_file',
+    'from_string',
+    'to_dicts',
+    'to_stream',
+    'to_file',
+    'to_string',
+    'Todo',
+    'search'
+]
+   todo_data_regex = re.compile('^(?:(x) )?(?:(\d{4}-\d{2}-\d{2}) )?(?:\(([A-Z])\) )?(?:(\d{4}-\d{2}-\d{2}) )?')
+   todo_project_regex = re.compile(' \+(\S+)')
+   todo_context_regex = re.compile(' @(\S+)')
+   todo_tag_regex = re.compile(' (\S+):([^\s\/]+)')
+   
    for line in sys.argv[1:]:  
 
       bad_opt = True
