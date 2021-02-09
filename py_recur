@@ -381,31 +381,46 @@ def from_string_patched(string):
     :param str string: The string to parse
     :rtype: list
     """
+    print("= = = = = = = = = = = enter from_string_patched")
     todos = []
+
+    print(string)
 
     for line in string.strip().splitlines():
         line = line.strip()
 
         todo_pre_data = todo_data_regex.match(line)
 
-        todo = Todo()
+        todo = todotxtio.Todo()
 
-        # pre-group indexes don't change if completed or not
+        print("- - - - - - - - - -")
+        print("todo_pre_data:")
+        print(todo_pre_data.group(1))
+        print(todo_pre_data.group(2))
+        print(todo_pre_data.group(3))
+        print(todo_pre_data.group(4))
+        print("line: " + line)
+
+        # group 1: x for completed
+        # group 2: if completed, completion date, else creation date
+        # group 3: priority
+        # group 4: if completed, creation date
+            
         if todo_pre_data:
             todo.completed = todo_pre_data.group(1) == 'x'
-            
+
             if todo.completed:
+                todo.creation_date = todo_pre_data.group(4)
+
                 if todo_pre_data.group(2):
                     todo.completion_date = todo_pre_data.group(2)
+            else:
+                todo.creation_date = todo_pre_data.group(2)
 
             todo.priority = todo_pre_data.group(3)
-            
-            todo.creation_date = todo_pre_data.group(4)            
 
             text = todo_data_regex.sub('', line).strip()
-
         else:
-
             text = line
 
         todo_projects = todo_project_regex.findall(text)
@@ -431,6 +446,9 @@ def from_string_patched(string):
         todo.text = text
         
         todos.append(todo)
+        print("final todo: " + str(todo))
+        
+    print("= = = = = = = = = = = exit from_string_patched")
 
     return todos
    
@@ -673,6 +691,9 @@ try:
       for todo_obj in todo_list_new:
          print(todo_obj)
          todo_list.append(todo_obj)
+      print("\n\nHere is the final tototxtio file from memory:\n\n")
+      for todo in todo_list:
+         print(str(todo))
       todotxtio.to_file(todo_file, todo_list)
       Path(str(completed_file)).touch()
 
