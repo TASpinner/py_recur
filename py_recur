@@ -51,7 +51,7 @@ import sys
 import time
 import todotxtio as basetodotxtio
 
-VERSION='2021-02-07'
+VERSION='2021-02-09_2216'
 
 def check_schedule( schedstr, cur_day):
                  
@@ -408,18 +408,20 @@ def from_string_patched(string):
             
         if todo_pre_data:
             todo.completed = todo_pre_data.group(1) == 'x'
-
-            if todo.completed:
-                todo.creation_date = todo_pre_data.group(4)
-
-                if todo_pre_data.group(2):
-                    todo.completion_date = todo_pre_data.group(2)
-            else:
-                todo.creation_date = todo_pre_data.group(2)
-
+            
             todo.priority = todo_pre_data.group(3)
 
+            if todo.completed:
+               todo.completion_date = todo_pre_data.group(2)               
+               todo.creation_date = todo_pre_data.group(4)
+            else:
+               if (todo.priority is None):
+                  todo.creation_date = todo_pre_data.group(2)                  
+               else:                 
+                  todo.creation_date = todo_pre_data.group(4)
+
             text = todo_data_regex.sub('', line).strip()
+
         else:
             text = line
 
