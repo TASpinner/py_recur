@@ -36,6 +36,8 @@
 #    - python3 installed in /usr/bin/python3
 #    - link to keep a common bang line:
 #      sudo ln -s /usr/bin/python3 /usr/local/bin/python3
+#
+# The balance of files in this project are to assist in development and test of this script
 
 import datetime 
 from datetime import date, timedelta
@@ -51,7 +53,7 @@ import sys
 import time
 import todotxtio as basetodotxtio
 
-VERSION='2021-02-10'
+VERSION='2021-02-11'
 
 def check_schedule( schedstr, cur_day):
                  
@@ -662,9 +664,6 @@ try:
       for todo_obj in todo_list_new:
          print(todo_obj)
          todo_list.append(todo_obj)
-      print("\n\nHere is the final tototxtio file from memory:\n\n")
-      for todo in todo_list:
-         print(str(todo))
       todotxtio.to_file(todo_file, todo_list)
       Path(str(completed_file)).touch()
 
