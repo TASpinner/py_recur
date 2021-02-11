@@ -51,7 +51,7 @@ import sys
 import time
 import todotxtio as basetodotxtio
 
-VERSION='2021-02-09_2216'
+VERSION='2021-02-10'
 
 def check_schedule( schedstr, cur_day):
                  
@@ -381,10 +381,7 @@ def from_string_patched(string):
     :param str string: The string to parse
     :rtype: list
     """
-    print("= = = = = = = = = = = enter from_string_patched")
     todos = []
-
-    print(string)
 
     for line in string.strip().splitlines():
         line = line.strip()
@@ -393,19 +390,6 @@ def from_string_patched(string):
 
         todo = todotxtio.Todo()
 
-        print("- - - - - - - - - -")
-        print("todo_pre_data:")
-        print(todo_pre_data.group(1))
-        print(todo_pre_data.group(2))
-        print(todo_pre_data.group(3))
-        print(todo_pre_data.group(4))
-        print("line: " + line)
-
-        # group 1: x for completed
-        # group 2: if completed, completion date, else creation date
-        # group 3: priority
-        # group 4: if completed, creation date
-            
         if todo_pre_data:
             todo.completed = todo_pre_data.group(1) == 'x'
             
@@ -448,9 +432,6 @@ def from_string_patched(string):
         todo.text = text
         
         todos.append(todo)
-        print("final todo: " + str(todo))
-        
-    print("= = = = = = = = = = = exit from_string_patched")
 
     return todos
    
@@ -472,18 +453,6 @@ try:
    todotxtio.from_string = from_string_patched
    
    # these are used in todotxtio, but outside of methods
-   __all__ = [
-    'from_dicts',
-    'from_stream',
-    'from_file',
-    'from_string',
-    'to_dicts',
-    'to_stream',
-    'to_file',
-    'to_string',
-    'Todo',
-    'search'
-]
    todo_data_regex = re.compile('^(?:(x) )?(?:(\d{4}-\d{2}-\d{2}) )?(?:\(([A-Z])\) )?(?:(\d{4}-\d{2}-\d{2}) )?')
    todo_project_regex = re.compile(' \+(\S+)')
    todo_context_regex = re.compile(' @(\S+)')
