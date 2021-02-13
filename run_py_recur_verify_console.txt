@@ -3,36 +3,6 @@ opts_test
 opts_override_input_rule = py_recur_verify.txt
 opts_override_input_task = todo_verify.txt
 opts_override_date = 2020-12-31
-- - - - -
-2021-01-01 this will match a entry in the todo_verify.txt and not be added
-None
-2021-01-01
-None
-None
-- - - - -
-2021-01-02 (A) test stripping creation date with a priority
-None
-2021-01-02
-A
-None
-- - - - -
-2021-01-03 test stripping creation date without a priority
-None
-2021-01-03
-None
-None
-- - - - -
-test stripping projects +project1 +project2 +project3
-None
-None
-None
-None
-- - - - -
-test stripping contexts @context1 @context2 @context3
-None
-None
-None
-None
 Processing day... 2020-12-30
 py_recur.txt entry:  DAILY, dtstart=parse("20201230T000000") - this will match a entry in the todo_verify.txt and not be added
 schedstr_fmt:  DTSTART:20201230T000000
@@ -41,12 +11,6 @@ rule_list:
 2020-12-30 00:00:00
 2020-12-31 00:00:00
 - Recur matches 2020-12-30: DAILY, dtstart=parse("20201230T000000") - this will match a entry in the todo_verify.txt and not be added
-- - - - -
-this will match a entry in the todo_verify.txt and not be added
-None
-None
-None
-None
     - Duplicate task exists: this will match a entry in the todo_verify.txt and not be added
 py_recur.txt entry:  DAILY, dtstart=parse("20201230T000000") - this does not have an entry in the todo_verify.txt and be added
 schedstr_fmt:  DTSTART:20201230T000000
@@ -55,12 +19,6 @@ rule_list:
 2020-12-30 00:00:00
 2020-12-31 00:00:00
 - Recur matches 2020-12-30: DAILY, dtstart=parse("20201230T000000") - this does not have an entry in the todo_verify.txt and be added
-- - - - -
-this does not have an entry in the todo_verify.txt and be added
-None
-None
-None
-None
     - No duplicate found for this does not have an entry in the todo_verify.txt and be added
     - Adding 2020-12-30 this does not have an entry in the todo_verify.txt and be added
 py_recur.txt entry:  DAILY, interval=2, count=9 - every other day for a total of 9
@@ -409,12 +367,6 @@ rule_list:
 2020-01-01 00:00:00
 2020-12-30 00:00:00
 - Recur matches 2020-12-30: YEARLY, byyearday=(1,365) - first and last (non-leap) day of every year
-- - - - -
-first and last (non-leap) day of every year
-None
-None
-None
-None
     - No duplicate found for first and last (non-leap) day of every year
     - Adding 2020-12-30 first and last (non-leap) day of every year
 Processing day... 2020-12-31
@@ -426,12 +378,6 @@ rule_list:
 2020-12-31 00:00:00
 2021-01-01 00:00:00
 - Recur matches 2020-12-31: DAILY, dtstart=parse("20201230T000000") - this will match a entry in the todo_verify.txt and not be added
-- - - - -
-this will match a entry in the todo_verify.txt and not be added
-None
-None
-None
-None
     - Duplicate task exists: this will match a entry in the todo_verify.txt and not be added
 py_recur.txt entry:  DAILY, dtstart=parse("20201230T000000") - this does not have an entry in the todo_verify.txt and be added
 schedstr_fmt:  DTSTART:20201230T000000
@@ -441,12 +387,6 @@ rule_list:
 2020-12-31 00:00:00
 2021-01-01 00:00:00
 - Recur matches 2020-12-31: DAILY, dtstart=parse("20201230T000000") - this does not have an entry in the todo_verify.txt and be added
-- - - - -
-this does not have an entry in the todo_verify.txt and be added
-None
-None
-None
-None
     - Duplicate task exists: this does not have an entry in the todo_verify.txt and be added
 py_recur.txt entry:  DAILY, interval=2, count=9 - every other day for a total of 9
 schedstr_fmt:  DTSTART:20180101T000000
@@ -609,12 +549,6 @@ rule_list:
 2020-11-30 00:00:00
 2020-12-31 00:00:00
 - Recur matches 2020-12-31: MONTHLY, bymonthday=(-1) - last day of every month
-- - - - -
-last day of every month
-None
-None
-None
-None
     - No duplicate found for last day of every month
     - Adding 2020-12-30 last day of every month
 py_recur.txt entry:  MONTHLY, bymonthday=(2,3) - the 2nd and 3rd of every month
@@ -734,12 +668,6 @@ rule_list:
 2020-11-30 00:00:00
 2020-12-31 00:00:00
 - Recur matches 2020-12-31: MONTHLY, byweekday=(MO,TU,WE,TH,FR), bysetpos=-1 - last workday of every month
-- - - - -
-last workday of every month
-None
-None
-None
-None
     - No duplicate found for last workday of every month
     - Adding 2020-12-30 last workday of every month
 py_recur.txt entry:  MONTHLY, count=3, byweekday=(2TU) - second Tuesday of the month for 3 months
@@ -802,12 +730,6 @@ rule_list:
 2019-12-31 00:00:00
 2020-12-31 00:00:00
 - Recur matches 2020-12-31: YEARLY, byyearday=(-1) - last day of every year
-- - - - -
-last day of every year
-None
-None
-None
-None
     - No duplicate found for last day of every year
     - Adding 2020-12-30 last day of every year
 py_recur.txt entry:  YEARLY, byyearday=(1,365) - first and last (non-leap) day of every year
