@@ -1,4 +1,10 @@
-2021-01-29 this will match a entry in the todo_verify.txt and not be added
+2021-01-01 this will match a entry in the todo_verify.txt and not be added
+(A) 2021-01-02 test stripping creation date with a priority
+2021-01-03 test stripping creation date without a priority
+x 2021-01-11 (A) 2021-01-04 test stripping in a completed task with priority
+x 2021-01-12 2021-01-05 test stripping in a completed task without a priority
+test stripping projects +project1 +project2 +project3
+test stripping contexts @context1 @context2 @context3
 2020-12-30 this does not have an entry in the todo_verify.txt and be added
 2020-12-30 first and last (non-leap) day of every year
 2020-12-30 last day of every month

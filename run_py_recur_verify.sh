@@ -17,11 +17,11 @@ echo
 todo.sh -d config py_recur -t -oir="py_recur_verify.txt" -oit="todo_verify.txt" -osd=2020-12-31 > run_py_recur_verify_console.txt
 echo
 echo Running diffs on the saved console output. A pass will only show a different verison number at most.
-echo
-diff run_py_recur_verify_console.txt run_py_recur_verify_console_master.txt
+echo diff run_py_recur_verify_console_master.txt run_py_recur_verify_console.txt 
+diff run_py_recur_verify_console_master.txt run_py_recur_verify_console.txt 
 echo 
 echo Running diffs on the modified todo_verify.txt file. A pass will show no differences.
-echo
+echo diff todo_verify.txt todo_verify_master.txt  
 diff todo_verify.txt todo_verify_master.txt
 echo
 echo Done.

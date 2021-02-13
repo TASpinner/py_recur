@@ -1,74 +1,8 @@
-py_recur version 2021-02-07
+py_recur version 2021-02-12
 opts_test
 opts_override_input_rule = py_recur_verify.txt
 opts_override_input_task = todo_verify.txt
 opts_override_date = 2020-12-31
-= = = = = = = = = = = enter from_string_patched
-2021-01-01 this will match a entry in the todo_verify.txt and not be added
-2021-01-02 (A) test stripping creation date with a priority
-2021-01-03 test stripping creation date without a priority
-x 2021-01-11 (A) 2021-01-04 test stripping in a completed task with priority
-x 2021-01-12 2021-01-05 test stripping in a completed task without a priority
-test stripping projects +project1 +project2 +project3
-test stripping contexts @context1 @context2 @context3
-
-- - - - - - - - - -
-todo_pre_data:
-None
-2021-01-01
-None
-None
-line: 2021-01-01 this will match a entry in the todo_verify.txt and not be added
-final todo: 2021-01-01 this will match a entry in the todo_verify.txt and not be added
-- - - - - - - - - -
-todo_pre_data:
-None
-2021-01-02
-A
-None
-line: 2021-01-02 (A) test stripping creation date with a priority
-final todo: (A) 2021-01-02 test stripping creation date with a priority
-- - - - - - - - - -
-todo_pre_data:
-None
-2021-01-03
-None
-None
-line: 2021-01-03 test stripping creation date without a priority
-final todo: 2021-01-03 test stripping creation date without a priority
-- - - - - - - - - -
-todo_pre_data:
-x
-2021-01-11
-A
-2021-01-04
-line: x 2021-01-11 (A) 2021-01-04 test stripping in a completed task with priority
-final todo: x 2021-01-11 (A) 2021-01-04 test stripping in a completed task with priority
-- - - - - - - - - -
-todo_pre_data:
-x
-2021-01-12
-None
-2021-01-05
-line: x 2021-01-12 2021-01-05 test stripping in a completed task without a priority
-final todo: x 2021-01-12 2021-01-05 test stripping in a completed task without a priority
-- - - - - - - - - -
-todo_pre_data:
-None
-None
-None
-None
-line: test stripping projects +project1 +project2 +project3
-final todo: test stripping projects +project1 +project2 +project3
-- - - - - - - - - -
-todo_pre_data:
-None
-None
-None
-None
-line: test stripping contexts @context1 @context2 @context3
-final todo: test stripping contexts @context1 @context2 @context3
-= = = = = = = = = = = exit from_string_patched
 Processing day... 2020-12-30
 py_recur.txt entry:  DAILY, dtstart=parse("20201230T000000") - this will match a entry in the todo_verify.txt and not be added
 schedstr_fmt:  DTSTART:20201230T000000
@@ -77,18 +11,6 @@ rule_list:
 2020-12-30 00:00:00
 2020-12-31 00:00:00
 - Recur matches 2020-12-30: DAILY, dtstart=parse("20201230T000000") - this will match a entry in the todo_verify.txt and not be added
-= = = = = = = = = = = enter from_string_patched
-this will match a entry in the todo_verify.txt and not be added
-
-- - - - - - - - - -
-todo_pre_data:
-None
-None
-None
-None
-line: this will match a entry in the todo_verify.txt and not be added
-final todo: this will match a entry in the todo_verify.txt and not be added
-= = = = = = = = = = = exit from_string_patched
     - Duplicate task exists: this will match a entry in the todo_verify.txt and not be added
 py_recur.txt entry:  DAILY, dtstart=parse("20201230T000000") - this does not have an entry in the todo_verify.txt and be added
 schedstr_fmt:  DTSTART:20201230T000000
@@ -97,18 +19,6 @@ rule_list:
 2020-12-30 00:00:00
 2020-12-31 00:00:00
 - Recur matches 2020-12-30: DAILY, dtstart=parse("20201230T000000") - this does not have an entry in the todo_verify.txt and be added
-= = = = = = = = = = = enter from_string_patched
-this does not have an entry in the todo_verify.txt and be added
-
-- - - - - - - - - -
-todo_pre_data:
-None
-None
-None
-None
-line: this does not have an entry in the todo_verify.txt and be added
-final todo: this does not have an entry in the todo_verify.txt and be added
-= = = = = = = = = = = exit from_string_patched
     - No duplicate found for this does not have an entry in the todo_verify.txt and be added
     - Adding 2020-12-30 this does not have an entry in the todo_verify.txt and be added
 py_recur.txt entry:  DAILY, interval=2, count=9 - every other day for a total of 9
@@ -457,18 +367,6 @@ rule_list:
 2020-01-01 00:00:00
 2020-12-30 00:00:00
 - Recur matches 2020-12-30: YEARLY, byyearday=(1,365) - first and last (non-leap) day of every year
-= = = = = = = = = = = enter from_string_patched
-first and last (non-leap) day of every year
-
-- - - - - - - - - -
-todo_pre_data:
-None
-None
-None
-None
-line: first and last (non-leap) day of every year
-final todo: first and last (non-leap) day of every year
-= = = = = = = = = = = exit from_string_patched
     - No duplicate found for first and last (non-leap) day of every year
     - Adding 2020-12-30 first and last (non-leap) day of every year
 Processing day... 2020-12-31
@@ -480,18 +378,6 @@ rule_list:
 2020-12-31 00:00:00
 2021-01-01 00:00:00
 - Recur matches 2020-12-31: DAILY, dtstart=parse("20201230T000000") - this will match a entry in the todo_verify.txt and not be added
-= = = = = = = = = = = enter from_string_patched
-this will match a entry in the todo_verify.txt and not be added
-
-- - - - - - - - - -
-todo_pre_data:
-None
-None
-None
-None
-line: this will match a entry in the todo_verify.txt and not be added
-final todo: this will match a entry in the todo_verify.txt and not be added
-= = = = = = = = = = = exit from_string_patched
     - Duplicate task exists: this will match a entry in the todo_verify.txt and not be added
 py_recur.txt entry:  DAILY, dtstart=parse("20201230T000000") - this does not have an entry in the todo_verify.txt and be added
 schedstr_fmt:  DTSTART:20201230T000000
@@ -501,18 +387,6 @@ rule_list:
 2020-12-31 00:00:00
 2021-01-01 00:00:00
 - Recur matches 2020-12-31: DAILY, dtstart=parse("20201230T000000") - this does not have an entry in the todo_verify.txt and be added
-= = = = = = = = = = = enter from_string_patched
-this does not have an entry in the todo_verify.txt and be added
-
-- - - - - - - - - -
-todo_pre_data:
-None
-None
-None
-None
-line: this does not have an entry in the todo_verify.txt and be added
-final todo: this does not have an entry in the todo_verify.txt and be added
-= = = = = = = = = = = exit from_string_patched
     - Duplicate task exists: this does not have an entry in the todo_verify.txt and be added
 py_recur.txt entry:  DAILY, interval=2, count=9 - every other day for a total of 9
 schedstr_fmt:  DTSTART:20180101T000000
@@ -675,18 +549,6 @@ rule_list:
 2020-11-30 00:00:00
 2020-12-31 00:00:00
 - Recur matches 2020-12-31: MONTHLY, bymonthday=(-1) - last day of every month
-= = = = = = = = = = = enter from_string_patched
-last day of every month
-
-- - - - - - - - - -
-todo_pre_data:
-None
-None
-None
-None
-line: last day of every month
-final todo: last day of every month
-= = = = = = = = = = = exit from_string_patched
     - No duplicate found for last day of every month
     - Adding 2020-12-30 last day of every month
 py_recur.txt entry:  MONTHLY, bymonthday=(2,3) - the 2nd and 3rd of every month
@@ -806,18 +668,6 @@ rule_list:
 2020-11-30 00:00:00
 2020-12-31 00:00:00
 - Recur matches 2020-12-31: MONTHLY, byweekday=(MO,TU,WE,TH,FR), bysetpos=-1 - last workday of every month
-= = = = = = = = = = = enter from_string_patched
-last workday of every month
-
-- - - - - - - - - -
-todo_pre_data:
-None
-None
-None
-None
-line: last workday of every month
-final todo: last workday of every month
-= = = = = = = = = = = exit from_string_patched
     - No duplicate found for last workday of every month
     - Adding 2020-12-30 last workday of every month
 py_recur.txt entry:  MONTHLY, count=3, byweekday=(2TU) - second Tuesday of the month for 3 months
@@ -880,18 +730,6 @@ rule_list:
 2019-12-31 00:00:00
 2020-12-31 00:00:00
 - Recur matches 2020-12-31: YEARLY, byyearday=(-1) - last day of every year
-= = = = = = = = = = = enter from_string_patched
-last day of every year
-
-- - - - - - - - - -
-todo_pre_data:
-None
-None
-None
-None
-line: last day of every year
-final todo: last day of every year
-= = = = = = = = = = = exit from_string_patched
     - No duplicate found for last day of every year
     - Adding 2020-12-30 last day of every year
 py_recur.txt entry:  YEARLY, byyearday=(1,365) - first and last (non-leap) day of every year
@@ -910,23 +748,6 @@ rule_list:
 Here's the entries we're adding:
 
 
-2020-12-30 this does not have an entry in the todo_verify.txt and be added
-2020-12-30 first and last (non-leap) day of every year
-2020-12-30 last day of every month
-2020-12-30 last workday of every month
-2020-12-30 last day of every year
-
-
-Here is the final tototxtio file from memory:
-
-
-2021-01-01 this will match a entry in the todo_verify.txt and not be added
-(A) 2021-01-02 test stripping creation date with a priority
-2021-01-03 test stripping creation date without a priority
-x 2021-01-11 (A) 2021-01-04 test stripping in a completed task with priority
-x 2021-01-12 2021-01-05 test stripping in a completed task without a priority
-test stripping projects +project1 +project2 +project3
-test stripping contexts @context1 @context2 @context3
 2020-12-30 this does not have an entry in the todo_verify.txt and be added
 2020-12-30 first and last (non-leap) day of every year
 2020-12-30 last day of every month
