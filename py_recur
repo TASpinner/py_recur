@@ -401,7 +401,12 @@ def from_string_patched(string):
                todo.completion_date = todo_pre_data.group(2)               
                todo.creation_date = todo_pre_data.group(4)
             else:
-               todo.creation_date = todo_pre_data.group(2)                  
+               # This is a hack; when not completed, the creation date ends up in group 2 or group 4
+               # It isn't even consistent with priority and no priority tasks
+               if(todo_pre_data.group(2) is None):
+                  todo.creation_date = todo_pre_data.group(4) 
+               else:
+                  todo.creation_date = todo_pre_data.group(2)  
 
             text = todo_data_regex.sub('', line).strip()
 
