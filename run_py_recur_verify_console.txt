@@ -1,9 +1,18 @@
-py_recur version 2021-02-12
+py_recur version 2021-02-14
 opts_test
 opts_override_input_rule = py_recur_verify.txt
 opts_override_input_task = todo_verify.txt
 opts_override_date = 2020-12-31
 Processing day... 2020-12-30
+py_recur.txt entry:  DAILY, dtstart=parse("20201230T000000") - duplicate tasks with an embedded add date are not duplicates, added __date__
+schedstr_fmt:  DTSTART:20201230T000000
+RRULE:FREQ=DAILY;UNTIL=20201231T000000
+rule_list: 
+2020-12-30 00:00:00
+2020-12-31 00:00:00
+- Recur matches 2020-12-30: DAILY, dtstart=parse("20201230T000000") - duplicate tasks with an embedded add date are not duplicates, added 2020-12-30
+    - No duplicate found for duplicate tasks with an embedded add date are not duplicates, added 2020-12-30
+    - Adding 2020-12-30 duplicate tasks with an embedded add date are not duplicates, added 2020-12-30
 py_recur.txt entry:  DAILY, dtstart=parse("20201230T000000") - this will match a entry in the todo_verify.txt and not be added
 schedstr_fmt:  DTSTART:20201230T000000
 RRULE:FREQ=DAILY;UNTIL=20201231T000000
@@ -370,6 +379,16 @@ rule_list:
     - No duplicate found for first and last (non-leap) day of every year
     - Adding 2020-12-30 first and last (non-leap) day of every year
 Processing day... 2020-12-31
+py_recur.txt entry:  DAILY, dtstart=parse("20201230T000000") - duplicate tasks with an embedded add date are not duplicates, added __date__
+schedstr_fmt:  DTSTART:20201230T000000
+RRULE:FREQ=DAILY;UNTIL=20210101T000000
+rule_list: 
+2020-12-30 00:00:00
+2020-12-31 00:00:00
+2021-01-01 00:00:00
+- Recur matches 2020-12-31: DAILY, dtstart=parse("20201230T000000") - duplicate tasks with an embedded add date are not duplicates, added 2020-12-31
+    - No duplicate found for duplicate tasks with an embedded add date are not duplicates, added 2020-12-31
+    - Adding 2020-12-30 duplicate tasks with an embedded add date are not duplicates, added 2020-12-31
 py_recur.txt entry:  DAILY, dtstart=parse("20201230T000000") - this will match a entry in the todo_verify.txt and not be added
 schedstr_fmt:  DTSTART:20201230T000000
 RRULE:FREQ=DAILY;UNTIL=20210101T000000
@@ -748,8 +767,10 @@ rule_list:
 Here's the entries we're adding:
 
 
+2020-12-30 duplicate tasks with an embedded add date are not duplicates, added 2020-12-30
 2020-12-30 this does not have an entry in the todo_verify.txt and be added
 2020-12-30 first and last (non-leap) day of every year
+2020-12-30 duplicate tasks with an embedded add date are not duplicates, added 2020-12-31
 2020-12-30 last day of every month
 2020-12-30 last workday of every month
 2020-12-30 last day of every year

@@ -13,7 +13,6 @@ echo 'test stripping projects +project1 +project2 +project3'                    
 echo 'test stripping contexts @context1 @context2 @context3'                         >> todo_verify.txt
 echo
 echo Running tests on py_recur, writing console output to a file for comparison with a master file
-echo
 todo.sh -d config py_recur -t -oir="py_recur_verify.txt" -oit="todo_verify.txt" -osd=2020-12-31 > run_py_recur_verify_console.txt
 echo
 echo Running diffs on the saved console output. A pass will only show a different verison number at most.

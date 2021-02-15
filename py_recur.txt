@@ -1,4 +1,1 @@
-MONTHLY, count=3, byweekday=(-1SU) - last Sunday of the month for 3 months
-MONTHLY, count=6, byweekday=(1FR,-1FR) - first and last Friday of the month for 3 months
-
-
+DAILY, dtstart=parse("20210213T000000") - duplicate tasks with an embedded add date are not duplicates, added __date__

@@ -53,7 +53,7 @@ import sys
 import time
 import todotxtio as basetodotxtio
 
-VERSION='2021-02-12'
+VERSION='2021-02-14'
 
 def check_schedule( schedstr, cur_day):
                  
@@ -364,6 +364,7 @@ until==parse("YYYYMMDDT000000")        YYYYMMDD is a formatted date, defaults to
 wkst=SU | MO | TU | WE | TH | FR | SA  first two letters of the day, used to align byweekno   
 
 Entries look like:
+DAILY - will be tranlated into the processing date: __today__, becomes unique to defeat duplicate
 DAILY - (A) insert every day @context1 +project2
 DAILY, interval=3, dtstart=parse("20210101T000000") - (B) insert every third day starting 1/1/2021
 WEEKLY, byweekday=(MO) - (C) insert every Monday + project2
@@ -371,7 +372,9 @@ WEEKLY, byweekday=(MO,TU,WE,TH,FR) - (A) insert every weekday @context2
 WEEKLY, byweekday=(FR) - (B) insert every other Friday @context1 @context2
 MONTHLY, bymonthday=15 - (C) insert monthly on the 15th
 MONTHLY, bymonthday=-1 - (A) insert the last day of the month
-YEARLY, interval=3, dtstart=parse("20180301T000000") - (A) insert every third yearr beginning 3/1/2018
+MONTHLY, count=3, byweekday=(2TU) - insert the second Tuesday of the month for 3 months
+YEARLY, interval=3, dtstart=parse("20180301T000000") - (A) insert every third year beginning 3/1/2018
+YEARLY, byeaster=0 - insert on Easter
 
    '''
        )  
@@ -613,6 +616,10 @@ try:
          scratch = recur.split(" - ", 1)
          schedstr = scratch[0]
          taskstr = scratch[1] 
+         
+         # translate __today__ here so that multi-day runs have unique text values
+         taskstr = taskstr.replace('__date__', str(cur_day))
+         
          if (check_schedule(schedstr, cur_day)):
             print('- Recur matches %s: %s - %s' % (cur_day, schedstr, taskstr), end='')
             # turn the taskstr into an object for ease of comparison
