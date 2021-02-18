@@ -1,5 +1,6 @@
 I used these files for development of py_recur outside of my production
-environment. If you want to use this project, you only need py_recur.
+environment. If you want to use this project, you only need py_recur and
+py_recur.txt which will contain the rules that py_recur uses.
 
 More information is available in the text of the script. py_recur_verify.txt
 has more examples of rules.
@@ -10,7 +11,7 @@ has more examples of rules.
 files:
 
 py_recur                               the add-in we are developing here
-README		                       this file
+README.md		                        this file
 
 .py_recur_completed                    time stamp of this file tracks when the script was last run
 config                                 todo.txt config that uses this dir

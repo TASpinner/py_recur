@@ -1,4 +1,4 @@
-py_recur version 2021-02-12
+py_recur version 2021-02-18
 opts_test
 opts_override_input_rule = py_recur_verify.txt
 opts_override_input_task = todo_verify.txt
