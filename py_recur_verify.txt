@@ -3,7 +3,6 @@
 #
 # all rules run betweeen the default date of 2018-01-01 and the overridden test date unless explicitly written
 #
-DAILY, dtstart=parse("20201230T000000") - duplicate tasks with an embedded add date are not duplicates, added __date__
 DAILY, dtstart=parse("20201230T000000") - this will match a entry in the todo_verify.txt and not be added
 DAILY, dtstart=parse("20201230T000000") - this does not have an entry in the todo_verify.txt and be added
 DAILY, interval=2, count=9 - every other day for a total of 9

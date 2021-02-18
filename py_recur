@@ -18,6 +18,9 @@
 #    This script goes in $TODO_DIR/todo.actions.d/
 #
 #    You put your entries in $TODO_DIR/py_recur.txt
+#    - see py_recur_verify.txt for lots of examples
+#
+#    The balance of files in this project are to assist in development and test of this script
 #
 #    Optionally schedule with /bin/todo.sh py_recur to your crontab, to run once a day
 #
@@ -36,8 +39,6 @@
 #    - python3 installed in /usr/bin/python3
 #    - link to keep a common bang line:
 #      sudo ln -s /usr/bin/python3 /usr/local/bin/python3
-#
-# The balance of files in this project are to assist in development and test of this script
 
 import datetime 
 from datetime import date, timedelta
@@ -53,7 +54,7 @@ import sys
 import time
 import todotxtio as basetodotxtio
 
-VERSION='2021-02-14'
+VERSION='2021-02-18'
 
 def check_schedule( schedstr, cur_day):
                  
@@ -364,7 +365,7 @@ until==parse("YYYYMMDDT000000")        YYYYMMDD is a formatted date, defaults to
 wkst=SU | MO | TU | WE | TH | FR | SA  first two letters of the day, used to align byweekno   
 
 Entries look like:
-DAILY - will be tranlated into the processing date: __today__, becomes unique to defeat duplicate
+DAILY - will be tranlated into the processing date: __today__ becomes unique to defeat duplicate
 DAILY - (A) insert every day @context1 +project2
 DAILY, interval=3, dtstart=parse("20210101T000000") - (B) insert every third day starting 1/1/2021
 WEEKLY, byweekday=(MO) - (C) insert every Monday + project2
@@ -618,7 +619,7 @@ try:
          taskstr = scratch[1] 
          
          # translate __today__ here so that multi-day runs have unique text values
-         taskstr = taskstr.replace('__date__', str(cur_day))
+         taskstr = taskstr.replace('__today__', str(cur_day))
          
          if (check_schedule(schedstr, cur_day)):
             print('- Recur matches %s: %s - %s' % (cur_day, schedstr, taskstr), end='')
