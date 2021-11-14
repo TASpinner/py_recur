@@ -54,7 +54,7 @@ import sys
 import time
 import todotxtio as basetodotxtio
 
-VERSION='2021-02-18'
+VERSION='2021-02-18 WIP'
 
 def check_schedule( schedstr, cur_day):
                  
@@ -91,6 +91,7 @@ def check_schedule( schedstr, cur_day):
    count_defined = False
    
    # parse dtstart
+   TODO: Add ELAPSED function to this block
    try:
       dtstart_found = False
       for line in schedstr_list:
@@ -327,7 +328,7 @@ def print_usage():
    '''
 Usage
 -----
-todo.sh py_recur [-dr ][-f ][-h ][-ic ][-ip ][-oir=(name) ][-oit=(name) ][-osd=YYYY-MM-DD ][-sn ][-t ]
+todo.sh py_recur [-dr ][-f ][-h ][-ic ][-ip ][-oir=(name) ][-oit=(name) ][-odt=(name) ][-osd=YYYY-MM-DD ][-sn ][-t ]
 
 -dr Show the resulting entries but do not add them to the todo file
 -f  Run even if we appear to have already run today
@@ -339,8 +340,12 @@ todo.sh py_recur [-dr ][-f ][-h ][-ic ][-ip ][-oir=(name) ][-oit=(name) ][-osd=Y
 -ip Ignore_projects, By default, projects \"+foo\" are counted as part of the text when deciding if ice_recur is
     about to add a duplicate entry, so \"new entry\" would be added even if \"new entry +foo\" already exists. If
     you use this flag, those two will be considered the same entry and so it wouldn\'t be added. Additional projects in the todo.txt line are ignored.
--oir Override the input rule file name, same directory as py_recur.txt, example: -oir=py_recur_text.txt
+-oir Override the input rule file name, same directory as py_recur.txt, example: -oir=py_recur_teSt.txt
 -oit Override the input task file name, same directory as py_recur.txt, example: -oit=todo_test.txt
+-odt Override the input done file name, same directory as py_recur.txt, example: -odt=done_test.txt
+
+TODO: implement above
+
 -osd Override the start date, example, -osd=YYYY-MM-DD
 -t   Output additional text to the console useful test, including the dates generated for each rule
 
@@ -443,6 +448,20 @@ def from_string_patched(string):
 
     return todos
    
+def get_newest_date(string):
+
+   TODO
+   date=TODO default date
+   open done_file
+   while TODO more lines
+      read TODO line
+      if string matches
+         read TODO done_date
+         if TODO done_date > date
+            date = TODO done_date
+   close done_file
+   return date     
+
 # start main body of code, wrap with a try: except: block to catch things I didn't explicitly trap
 try:
    opts_dry_run = False          # -dr
@@ -451,6 +470,7 @@ try:
    opts_ignore_projects = False  # -ip
    opts_override_input_rule = "" # -oir="(name)"
    opts_override_input_task = "" # -oit="(name)"
+   opts_override_done_text = ""  # -odt="(name)"   
    opts_override_date = ""       # -osd="(YYYY-MM-TT)"
    opts_test = False             # -t
    
@@ -513,6 +533,16 @@ try:
             print("FAILURE, problem with -oit command line switch")
             exception_cleanup(e)
             exit(1) 
+            
+      if ("-odt=" in line):
+         try:
+            bad_opt = False
+            opts_override_done_txt = re.search('-odt=(.*)[^A-Za-z0-9\.]*', line).group(1)  
+            print("opts_override_done_text = " + opts_override_done_text)
+         except Exception as e:
+            print("FAILURE, problem with -odt command line switch")
+            exception_cleanup(e)
+            exit(1) 
 
       if ("-osd=" in line):
          try:
@@ -572,7 +602,19 @@ try:
    todo_list = todotxtio.from_file(todo_file)
 
    orig_todo_list = todo_list
+   
+   # set up the done.txt file
+   if (opts_override_input_task == ""):
+      done_file = os.environ.get('TODO_DIR') + "/" + 'done.txt'
+   else:
+      done_file = os.environ.get('TODO_DIR') + "/" + opts_override_done_text
       
+   # corner case; this file will typically exist unless you are testing...
+   scratch = Path(done_file)
+   if (not scratch.is_file()):
+      print("Failure, done file doesn't exist: " + done_file)
+      exit(1)       
+       
    # Get the last time the list was updated
    orig_todo_day = datetime.date.fromtimestamp(os.path.getmtime(todo_file)) 
 

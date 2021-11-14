@@ -1,0 +1,6 @@
+history is from newest to oldest
+
+version     what 
+2021-02-15  added this file
+2021-02-13  patched bug in todotxtio lib that would strip existing creation dates
+2021-01-30  initial release to public
