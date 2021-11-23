@@ -18,9 +18,9 @@ WEEKLY, wkst=SU, byweekday=(SU), count=3 - no idea what wkst does, but I'm passi
 WEEKLY, wkst=MO, byweekday=(SU), count=3 - no idea what wkst does, but I'm passing it
 WEEKLY, byweekday=(WE), byweekno=(1) - Wednesday in the first week of every year
 WEEKLY, byweekday=(TH), byweekno=(2,52) - Thursday in the second week and the 52nd week of every year
-MONTHLY, dtstart=parse("ELAPSED") - check ELAPSED without a matching done.txt entry and will be added
-MONTHLY, dtstart=parse("ELAPSED") - check ELAPSED with a done.txt entry that is newer that the recurrence and won't be added
-MONTHLY, dtstart=parse("ELAPSED") - check ELAPSED with a done.txt entry that is older that the recurrence and will be added
+MONTHLY, dtstart=parse("_elapsed_") - Replace _elapsed_ with the completion date of the newest match. No matching done.txt entry and will be added
+MONTHLY, dtstart=parse("_elapsed_") - Replace _elapsed_ with the completion date of the newest match. The done.txt entry is newer than the recurrence and won't be added
+MONTHLY, dtstart=parse("_elapsed_") - Replace _elapsed_ with the completion date of the newest match. The done.txt entry that is older that the recurrence and will be added
 MONTHLY, bymonth=(9) - every September 1 
 MONTHLY, bymonth=(10,11) - every October 1, November 1
 MONTHLY, bymonthday=(-1) - last day of every month

@@ -11,7 +11,7 @@ has more examples of rules.
 files:
 
 py_recur                               the add-in we are developing here
-README.md		                        this file
+README.md		                this file
 
 .py_recur_completed                    time stamp of this file tracks when the script was last run
 config                                 todo.txt config that uses this dir

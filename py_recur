@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3
+!/usr/local/bin/python3
 
 # py_recur: A recurring item generator for todo.txt.
 #
@@ -310,6 +310,20 @@ def check_schedule( schedstr, cur_day):
       if str(cur_day) == str(rule)[0:10]:
          return(True)
    return(False)
+   
+def get_elapsed( schedstr):
+
+   #TODO: finish this
+   #open done.txt considering override
+   #assign date to default
+   #while more lines in done.txt
+   #  if match
+   #     if matched date > date
+   #        date = matched date
+   #
+   #close done.txt
+   #convert date to dtstart format 
+   return "20200101T000000"  
 
 def exception_cleanup(e):
    if (len(e)>0):
@@ -365,6 +379,7 @@ byweekno=(x)                           multiple? seperate with commas
 byyearday=(x)                          multiple? seperate with commas 
 count=x                                number of occurrences, mutually exclusive with until
 dtstart=parse("YYYYMMDDT000000")       YYYYMMDD is a formatted date, defaults to 20180101T000000 
+dtstart=parse("_elapsed_")             _elapsed_ is replaced with a formatted date, created from the newest completed in match in done.txt
 interval=x                             where x = 1 or more 
 until==parse("YYYYMMDDT000000")        YYYYMMDD is a formatted date, defaults to day after script runs
 wkst=SU | MO | TU | WE | TH | FR | SA  first two letters of the day, used to align byweekno   
