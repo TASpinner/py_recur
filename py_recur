@@ -1,4 +1,4 @@
-!/usr/local/bin/python3
+#!/usr/local/bin/python3
 
 # py_recur: A recurring item generator for todo.txt.
 #
@@ -56,7 +56,7 @@ import todotxtio as basetodotxtio
 
 VERSION='2021-02-18 WIP'
 
-def check_schedule( schedstr, cur_day):
+def check_schedule( schedstr, taskstr, cur_day):
                  
    # parse out schedstr
    # The current code requires ,<space> between parameters unless in parens, then just commas
@@ -91,15 +91,17 @@ def check_schedule( schedstr, cur_day):
    count_defined = False
    
    # parse dtstart
-   TODO: Add ELAPSED function to this block
    try:
       dtstart_found = False
       for line in schedstr_list:
          if "dtstart=parse" in line:
-            dtstart_str = re.search('"(.*)"', line).group(1)
-            scratch = 'DTSTART:%s\n' % dtstart_str
-            schedstr_fmt = scratch + schedstr_fmt
             dtstart_found = True
+            dtstart_str = re.search('"(.*)"', line).group(1)
+            if (dtstart_str == "_elapsed_"):
+               dtstart_str = get_dt_start_str_elapsed( taskstr )
+               print ("jhd... post call, dtstart_str = ", dtstart_str)
+            scratch = 'DTSTART:%s\n' % dtstart_str
+            schedstr_fmt = scratch + schedstr_fmt            
             if (not ((dtstart_str[0:7]).isnumeric()) and (
                    dtstart_str[8:9] == "T") and (
                    dtstart_str[9:15]).isnumeric()):
@@ -309,21 +311,7 @@ def check_schedule( schedstr, cur_day):
    for rule in rule_list:
       if str(cur_day) == str(rule)[0:10]:
          return(True)
-   return(False)
-   
-def get_elapsed( schedstr):
-
-   #TODO: finish this
-   #open done.txt considering override
-   #assign date to default
-   #while more lines in done.txt
-   #  if match
-   #     if matched date > date
-   #        date = matched date
-   #
-   #close done.txt
-   #convert date to dtstart format 
-   return "20200101T000000"  
+   return(False)   
 
 def exception_cleanup(e):
    if (len(e)>0):
@@ -336,70 +324,6 @@ def exception_cleanup(e):
    else:
       print("FAILURE" + exception_text)
 
-def print_usage():
-   
-   print(
-   '''
-Usage
------
-todo.sh py_recur [-dr ][-f ][-h ][-ic ][-ip ][-oir=(name) ][-oit=(name) ][-odt=(name) ][-osd=YYYY-MM-DD ][-sn ][-t ]
-
--dr Show the resulting entries but do not add them to the todo file
--f  Run even if we appear to have already run today
--h  Show this text
--ic By default, contexts \"@foo\" are counted as part of the text when deciding if ice_recur is about to add a
-    duplicate entry, so \"new entry\" would be added even if \"new entry @foo\" already exists.  If you use this
-    flag, those two will be considered the same entry and so it wouldn\'t be added. Additional contexts in the
-    todo.txt line are ignored.
--ip Ignore_projects, By default, projects \"+foo\" are counted as part of the text when deciding if ice_recur is
-    about to add a duplicate entry, so \"new entry\" would be added even if \"new entry +foo\" already exists. If
-    you use this flag, those two will be considered the same entry and so it wouldn\'t be added. Additional projects in the todo.txt line are ignored.
--oir Override the input rule file name, same directory as py_recur.txt, example: -oir=py_recur_teSt.txt
--oit Override the input task file name, same directory as py_recur.txt, example: -oit=todo_test.txt
--odt Override the input done file name, same directory as py_recur.txt, example: -odt=done_test.txt
-
-TODO: implement above
-
--osd Override the start date, example, -osd=YYYY-MM-DD
--t   Output additional text to the console useful test, including the dates generated for each rule
-
-Every entry that matches the current day will be added, as long as there is no other entry with the
-same text content.
- 
-Recurrence Format; compiled into an RFC 2445 format
----------------------------------------------------
-each parameter seperated by a comma and a space
-DAILY | WEEKLY | MONTHLY | YEARLY      this is the only required parameter 
-byeaster=x                             0 = Easter, -x or +x are offsets
-bymonthday=(x)                         restrict matches to days of the month, multiple? comma delineated
-bymonth=(x)                            restrict matches to numbered month(s), multiple? comma delineated
-bysetpos=x                             restrict matches to this interval within the set otherwise returned 
-byweekday=(x)                          multiple? seperate with commas                     
-byweekno=(x)                           multiple? seperate with commas 
-byyearday=(x)                          multiple? seperate with commas 
-count=x                                number of occurrences, mutually exclusive with until
-dtstart=parse("YYYYMMDDT000000")       YYYYMMDD is a formatted date, defaults to 20180101T000000 
-dtstart=parse("_elapsed_")             _elapsed_ is replaced with a formatted date, created from the newest completed in match in done.txt
-interval=x                             where x = 1 or more 
-until==parse("YYYYMMDDT000000")        YYYYMMDD is a formatted date, defaults to day after script runs
-wkst=SU | MO | TU | WE | TH | FR | SA  first two letters of the day, used to align byweekno   
-
-Entries look like:
-DAILY - will be tranlated into the processing date: __today__ becomes unique to defeat duplicate
-DAILY - (A) insert every day @context1 +project2
-DAILY, interval=3, dtstart=parse("20210101T000000") - (B) insert every third day starting 1/1/2021
-WEEKLY, byweekday=(MO) - (C) insert every Monday + project2
-WEEKLY, byweekday=(MO,TU,WE,TH,FR) - (A) insert every weekday @context2
-WEEKLY, byweekday=(FR) - (B) insert every other Friday @context1 @context2
-MONTHLY, bymonthday=15 - (C) insert monthly on the 15th
-MONTHLY, bymonthday=-1 - (A) insert the last day of the month
-MONTHLY, count=3, byweekday=(2TU) - insert the second Tuesday of the month for 3 months
-YEARLY, interval=3, dtstart=parse("20180301T000000") - (A) insert every third year beginning 3/1/2018
-YEARLY, byeaster=0 - insert on Easter
-
-   '''
-       )  
-   
 # replacement for todotxtio's defective from_string
 def from_string_patched(string):
     """Load a todo list from a string.
@@ -462,21 +386,127 @@ def from_string_patched(string):
         todos.append(todo)
 
     return todos
+
+def get_dt_start_str_elapsed( taskstr ):
    
-def get_newest_date(string):
+   try:   
+      # need a default in case the object doesn't match anything in done
+      date_latest = '2018-01-01'
+      
+      taskstr_obj = todotxtio.from_string(taskstr)
+      
+      # bug in the .from_string? If not present, contexts and projects are initialized as an empty list
+      try:
+         len(taskstr_obj[0].contexts[0])
+      except:
+         taskstr_obj[0].contexts = ['']
+      
+      try:
+         len(taskstr_obj[0].projects[0])
+      except:
+         taskstr_obj[0].projects = ['']
+      
+      print ("jhd... taskstr_obj[0].priority",    taskstr_obj[0].priority)
+      print ("jhd... taskstr_obj[0].text",        taskstr_obj[0].text)
+      print ("jhd... taskstr_obj[0].contexts[0]", taskstr_obj[0].contexts[0])
+      print ("jhd... taskstr_obj[0].projects[0]", taskstr_obj[0].projects[0])
+    
+      # done_file was read into done_list in main
+      for done_obj in done_list:
+      
+         print ("jhd... taskstr_obj[0].text     ", taskstr_obj[0].text)
+         print ("jhd... done_obj.text           ", done_obj.text)
+         print ("jhd... done_obj.completion_date", done_obj.completion_date)
+         
+         # in each case, task is a match if it is a subset of the done object
+         # evaluate text      
+         if taskstr_obj[0].text.strip() == done_obj.text.strip():  
+            
+            print ("jhd... print match")
+            # evaluate projects
+            if ((set(taskstr_obj[0].projects).issubset(set(done_obj.projects))) or opts_ignore_projects):
+                
+               print ("jhd... passed project test")
+               # evaluate contexts
+               if ((set(taskstr_obj[0].contexts).issubset(set(done_obj.contexts))) or opts_ignore_contexts):   
+               
+                  print ("jhd... passed context test")
+                  print ("jhd... done_obj.completion_date     ", done_obj.completion_date)
+                  print ("jhd... date_latest                  ", date_latest)
+                  if done_obj.completion_date > date_latest:
+                     date_latest = done_obj.completion_date
+                     print ("date latest = ", date_latest)
 
-   TODO
-   date=TODO default date
-   open done_file
-   while TODO more lines
-      read TODO line
-      if string matches
-         read TODO done_date
-         if TODO done_date > date
-            date = TODO done_date
-   close done_file
-   return date     
+      date_latest = date_latest.replace('-', '') + "T000000"
+      print ("jhd... date latest = ", date_latest)
+      return date_latest
+   except Exception as e:
+      print("FAILURE, problem with get_dt_start_str_elapsed()")
+      exception_cleanup(e)
+      exit(1) 
+      
+def print_usage():
+   
+   print(
+   '''
+Usage
+-----
+todo.sh py_recur [-dr ][-f ][-h ][-ic ][-ip ][-oir=(name) ][-oit=(name) ][-odt=(name) ][-osd=YYYY-MM-DD ][-sn ][-t ]
 
+-dr Show the resulting entries but do not add them to the todo file
+-f  Run even if we appear to have already run today
+-h  Show this text
+-ic By default, contexts \"@foo\" are counted as part of the text when deciding if ice_recur is about to add a
+    duplicate entry, so \"new entry\" would be added even if \"new entry @foo\" already exists.  If you use this
+    flag, those two will be considered the same entry and so it wouldn\'t be added. Additional contexts in the
+    todo.txt line are ignored.
+-ip Ignore_projects, By default, projects \"+foo\" are counted as part of the text when deciding if ice_recur is
+    about to add a duplicate entry, so \"new entry\" would be added even if \"new entry +foo\" already exists. If
+    you use this flag, those two will be considered the same entry and so it wouldn\'t be added. Additional projects in the todo.txt line are ignored.
+-oir Override the input rule file name, same directory as py_recur.txt, example: -oir=py_recur_test.txt
+-oit Override the input task file name, same directory as py_recur.txt, example: -oit=todo_test.txt
+-oid Override the input done file name, same directory as py_recur.txt, example: -oid=done_test.txt
+
+-osd Override the start date, example, -osd=YYYY-MM-DD
+-t   Output additional text to the console useful test, including the dates generated for each rule
+
+Every entry that matches the current day will be added, as long as there is no other entry with the
+same text content.
+ 
+Recurrence Format; compiled into an RFC 2445 format
+---------------------------------------------------
+each parameter seperated by a comma and a space
+DAILY | WEEKLY | MONTHLY | YEARLY      this is the only required parameter 
+byeaster=x                             0 = Easter, -x or +x are offsetshttps://www.journaldev.com/23674/python-remove-character-from-string
+bymonthday=(x)                         restrict matches to days of the month, multiple? comma delineated
+bymonth=(x)                            restrict matches to numbered month(s), multiple? comma delineated
+bysetpos=x                             restrict matches to this interval within the set otherwise returned 
+byweekday=(x)                          multiple? seperate with commas                     
+byweekno=(x)                           multiple? seperate with commas 
+byyearday=(x)                          multiple? seperate with commas 
+count=x                                number of occurrences, mutually exclusive with until
+dtstart=parse("YYYYMMDDT000000")       YYYYMMDD is a formatted date, defaults to 20180101T000000 
+dtstart=parse("_elapsed_")             _elapsed_ is replaced with a formatted date, created from the newest completed in match in done.txt
+interval=x                             where x = 1 or more 
+until==parse("YYYYMMDDT000000")        YYYYMMDD is a formatted date, defaults to day after script runs
+wkst=SU | MO | TU | WE | TH | FR | SA  first two letters of the day, used to align byweekno   
+
+Entries look like:
+DAILY - will be tranlated into the processing date: __today__ becomes unique to defeat duplicate
+DAILY - (A) insert every day @context1 +project2
+DAILY, interval=3, dtstart=parse("20210101T000000") - (B) insert every third day starting 1/1/2021
+WEEKLY, byweekday=(MO) - (C) insert every Monday + project2
+WEEKLY, byweekday=(MO,TU,WE,TH,FR) - (A) insert every weekday @context2
+WEEKLY, byweekday=(FR) - (B) insert every other Friday @context1 @context2
+MONTHLY, bymonthday=15 - (C) insert monthly on the 15th
+MONTHLY, bymonthday=-1 - (A) insert the last day of the month
+MONTHLY, count=3, byweekday=(2TU) - insert the second Tuesday of the month for 3 months
+YEARLY, interval=3, dtstart=parse("20180301T000000") - (A) insert every third year beginning 3/1/2018
+YEARLY, byeaster=0 - insert on Easter
+
+   '''
+       )  
+   
 # start main body of code, wrap with a try: except: block to catch things I didn't explicitly trap
 try:
    opts_dry_run = False          # -dr
@@ -485,7 +515,7 @@ try:
    opts_ignore_projects = False  # -ip
    opts_override_input_rule = "" # -oir="(name)"
    opts_override_input_task = "" # -oit="(name)"
-   opts_override_done_text = ""  # -odt="(name)"   
+   opts_override_done_text = ""  # -oid="(name)"   
    opts_override_date = ""       # -osd="(YYYY-MM-TT)"
    opts_test = False             # -t
    
@@ -517,7 +547,7 @@ try:
 
       if (line == "-h"):
          print_usage()
-         exit(1)
+         exit(0)
          
       if (line == "-ic"):
          bad_opt = False
@@ -549,13 +579,13 @@ try:
             exception_cleanup(e)
             exit(1) 
             
-      if ("-odt=" in line):
+      if ("-oid=" in line):
          try:
             bad_opt = False
-            opts_override_done_txt = re.search('-odt=(.*)[^A-Za-z0-9\.]*', line).group(1)  
+            opts_override_done_text = re.search('-oid=(.*)[^A-Za-z0-9\.]*', line).group(1)  
             print("opts_override_done_text = " + opts_override_done_text)
          except Exception as e:
-            print("FAILURE, problem with -odt command line switch")
+            print("FAILURE, problem with -oid command line switch")
             exception_cleanup(e)
             exit(1) 
 
@@ -619,7 +649,7 @@ try:
    orig_todo_list = todo_list
    
    # set up the done.txt file
-   if (opts_override_input_task == ""):
+   if (opts_override_done_text == ""):
       done_file = os.environ.get('TODO_DIR') + "/" + 'done.txt'
    else:
       done_file = os.environ.get('TODO_DIR') + "/" + opts_override_done_text
@@ -628,8 +658,16 @@ try:
    scratch = Path(done_file)
    if (not scratch.is_file()):
       print("Failure, done file doesn't exist: " + done_file)
-      exit(1)       
-       
+      exit(1)
+      
+   # Read the done's
+   done_list = todotxtio.from_file(done_file)
+   
+   # Add the complete items that haven't been archived
+   for todo_obj in todo_list:
+      if todo_obj.completed:
+         done_list.append(todo_obj)
+      
    # Get the last time the list was updated
    orig_todo_day = datetime.date.fromtimestamp(os.path.getmtime(todo_file)) 
 
@@ -668,33 +706,36 @@ try:
    cur_day = start_day                               
    while(cur_day <= end_day):  
       print("Processing day...", cur_day)   
+      
       for recur in recur_entries:
+         print("jhd... starting a new recur entry")
          # remove CRLF for prettier exception printing
          recur.replace('\n', ' ').replace('\r', '')
          scratch = recur.split(" - ", 1)
          schedstr = scratch[0]
          taskstr = scratch[1] 
-         
+                  
          # translate __today__ here so that multi-day runs have unique text values
          taskstr = taskstr.replace('__today__', str(cur_day))
-         
-         if (check_schedule(schedstr, cur_day)):
+      
+         if (check_schedule(schedstr, taskstr, cur_day)):
             print('- Recur matches %s: %s - %s' % (cur_day, schedstr, taskstr), end='')
+            
             # turn the taskstr into an object for ease of comparison
-            taskstr_objs = todotxtio.from_string(taskstr)
+            taskstr_obj = todotxtio.from_string(taskstr)
             todo_obj_dupe = False
             for todo_obj in todo_list_trimmed:                   
                #evaluate text                     
                dupe_text = False
-               if (todo_obj.text == taskstr_objs[0].text):
+               if (todo_obj.text == taskstr_obj[0].text):
                   dupe_text = True
                # evaluate projects; is the taskstr a subset?
                dupe_projects = False
-               if (set(taskstr_objs[0].projects).issubset(set(todo_obj.projects))):
+               if (set(taskstr_obj[0].projects).issubset(set(todo_obj.projects))):
                   dupe_projects = True        
                # evaluate contexts; is the taskstr a subset?
                dupe_contexts = False
-               if (set(taskstr_objs[0].contexts).issubset(set(todo_obj.contexts))):
+               if (set(taskstr_obj[0].contexts).issubset(set(todo_obj.contexts))):
                   dupe_contexts = True                     
                if (dupe_text):
                   if ((opts_ignore_projects and opts_ignore_contexts) or
@@ -706,7 +747,7 @@ try:
             # end loop over trimmed todo's against recur entry
             if (not todo_obj_dupe):
                print('    - No duplicate found for ' + taskstr, end='')
-               todo_obj = taskstr_objs[0]
+               todo_obj = taskstr_obj[0]
                todo_obj.creation_date = str(start_day)
                print('    - Adding ' + str(todo_obj))
                todo_list_new.append(todo_obj) 
