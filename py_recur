@@ -399,30 +399,48 @@ def get_dt_start_str_elapsed( taskstr ):
       try:
          len(taskstr_obj[0].contexts[0])
       except:
-         taskstr_obj[0].contexts = ['']
+         taskstr_obj[0].contexts = []
       
       try:
          len(taskstr_obj[0].projects[0])
       except:
-         taskstr_obj[0].projects = ['']
+         taskstr_obj[0].projects = []
       
-      print ("jhd... taskstr_obj[0].priority",    taskstr_obj[0].priority)
-      print ("jhd... taskstr_obj[0].text",        taskstr_obj[0].text)
-      print ("jhd... taskstr_obj[0].contexts[0]", taskstr_obj[0].contexts[0])
-      print ("jhd... taskstr_obj[0].projects[0]", taskstr_obj[0].projects[0])
+      #print ("jhd... taskstr_obj[0].priority",    taskstr_obj[0].priority)
+      #print ("jhd... taskstr_obj[0].text",        taskstr_obj[0].text)
+      #print ("jhd... taskstr_obj[0].contexts[0]", taskstr_obj[0].contexts[0])
+      #print ("jhd... taskstr_obj[0].projects[0]", taskstr_obj[0].projects[0])
     
       # done_file was read into done_list in main
       for done_obj in done_list:
       
-         print ("jhd... taskstr_obj[0].text     ", taskstr_obj[0].text)
-         print ("jhd... done_obj.text           ", done_obj.text)
-         print ("jhd... done_obj.completion_date", done_obj.completion_date)
+         #print ("jhd... taskstr_obj[0].text     ", taskstr_obj[0].text)
+         #print ("jhd... done_obj.text           ", done_obj.text)
+         #print ("jhd... done_obj.completion_date", done_obj.completion_date)
          
          # in each case, task is a match if it is a subset of the done object
          # evaluate text      
          if taskstr_obj[0].text.strip() == done_obj.text.strip():  
             
+            
+            
+            
             print ("jhd... print match")
+            print ("jhd... set(taskstr_obj[0].projects).issubset(set(done_obj.projects)) = ",                                                set(taskstr_obj[0].projects).issubset(set(done_obj.projects)))
+            print ("jhd... left side")
+            for item in taskstr_obj[0].projects:
+               print (item)
+            print ("jhd... right side")
+            for item in done_obj.projects:
+               print (item)
+            
+            
+            
+            
+            print ("jhd... opts_ignore_projects = ", opts_ignore_projects)
+            
+            
+            
             # evaluate projects
             if ((set(taskstr_obj[0].projects).issubset(set(done_obj.projects))) or opts_ignore_projects):
                 
@@ -433,9 +451,11 @@ def get_dt_start_str_elapsed( taskstr ):
                   print ("jhd... passed context test")
                   print ("jhd... done_obj.completion_date     ", done_obj.completion_date)
                   print ("jhd... date_latest                  ", date_latest)
-                  if done_obj.completion_date > date_latest:
+                  print ("jhd... dateutil.parser.parse(done_obj.completion_date) = ", dateutil.parser.parse(done_obj.completion_date))
+                  print ("jhd... dateutil.parser.parse(date_latest) = ", dateutil.parser.parse(date_latest))
+                  if dateutil.parser.parse(done_obj.completion_date) > dateutil.parser.parse(date_latest):
                      date_latest = done_obj.completion_date
-                     print ("date latest = ", date_latest)
+                     print ("jhd... completion date = ", date_latest, " is now date_latest" )
 
       date_latest = date_latest.replace('-', '') + "T000000"
       print ("jhd... date latest = ", date_latest)
@@ -737,6 +757,9 @@ try:
                dupe_contexts = False
                if (set(taskstr_obj[0].contexts).issubset(set(todo_obj.contexts))):
                   dupe_contexts = True                     
+               print("jhd... dupe_text = ", dupe_text)
+               print("jhd... dupe_projects = ", dupe_projects)
+               print("jhd... dupe_contexts = ", dupe_contexts)
                if (dupe_text):
                   if ((opts_ignore_projects and opts_ignore_contexts) or
                       ((not opts_ignore_projects) and (dupe_projects)) or

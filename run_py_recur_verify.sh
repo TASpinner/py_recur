@@ -1,4 +1,4 @@
-# This script is used to verify changes to py_recur
+ #This script is used to verify changes to py_recur
 #
 # After development, perhaps adding new test cases, the master files for comparison cam be reset by copying output of this file:
 # cp run_py_recur_verify_console.txt run_py_recur_verify_console_master.txt
