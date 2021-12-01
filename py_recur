@@ -429,11 +429,15 @@ def get_dt_start_str_elapsed( taskstr ):
             print ("jhd... set(taskstr_obj[0].projects).issubset(set(done_obj.projects)) = ",                                                set(taskstr_obj[0].projects).issubset(set(done_obj.projects)))
             print ("jhd... left side")
             for item in taskstr_obj[0].projects:
-               print (item)
+               print ("jhd... taskstr project item: ", item)
             print ("jhd... right side")
             for item in done_obj.projects:
-               print (item)
-            
+               print ("jhd... done_obj project item: ", item)
+            for item in taskstr_obj[0].contexts:
+               print ("jhd... taskstr context item: ", item)
+            print ("jhd... right side")
+            for item in done_obj.contexts:
+               print ("jhd... done_obj context item: ", item)            
             
             
             
