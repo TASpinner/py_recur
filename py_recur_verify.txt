@@ -3,34 +3,35 @@
 #
 # all rules run betweeen the default date of 2018-01-01 and the overridden test date unless explicitly written
 #
-#DAILY, dtstart=parse("20201230T000000") - this will match a entry in the todo_verify.txt and not be added
-#DAILY, dtstart=parse("20201230T000000") - this does not have an entry in the todo_verify.txt and be added
+DAILY, dtstart=parse("20201230T000000") - this will match a entry in the todo_verify.txt and not be added
+DAILY, dtstart=parse("20201230T000000") - this does not have an entry in the todo_verify.txt and be added
 DAILY, interval=2, dtstart=parse("_elapsed_") - _elapsed_, no done.txt entry and will be added
 DAILY, interval=4, dtstart=parse("_elapsed_") - _elapsed_, done.txt entry newer and will not be added
 DAILY, interval=4, dtstart=parse("_elapsed_") - _elapsed_, done.txt entry older and will be added
-#DAILY, interval=2, count=9 - every other day for a total of 9
-#WEEKLY, byweekday=(SU), count=8 - weekly on Sunday for a total of 8
-#WEEKLY, byweekday=(MO), count=6 - weekly on Monday for a total of 6
-#WEEKLY, byweekday=(WE), count=1 - first Wednesday in range
-#WEEKLY, byweekday=(TH), count=1 - first Thursday in range
-#WEEKLY, byweekday=(FR), count=1 - first Friday in range
-#WEEKLY, byweekday=(SA), count=1 - first Saturday in range
-#WEEKLY, byweekday=(SU,SA), count=4 - weekly on Sunday and Saturday for a total of 4
-#WEEKLY, byweekday=(SU,MO,TU,WE,TH,FR,SA), bysetpos=6, count=5 - weekly on Friday for a total of 5
-#WEEKLY, wkst=SU, byweekday=(SU), count=3 - no idea what wkst does, but I'm passing it
-#WEEKLY, wkst=MO, byweekday=(SU), count=3 - no idea what wkst does, but I'm passing it
-#WEEKLY, byweekday=(WE), byweekno=(1) - Wednesday in the first week of every year
-#WEEKLY, byweekday=(TH), byweekno=(2,52) - Thursday in the second week and the 52nd week of every year
-#MONTHLY, bymonth=(9) - every September 1 
-#MONTHLY, bymonth=(10,11) - every October 1, November 1
-#MONTHLY, bymonthday=(-1) - last day of every month
-#MONTHLY, bymonthday=(2,3) - the 2nd and 3rd of every month
-#MONTHLY, byweekday=(MO,TU,WE,TH,FR), bysetpos=-1 - last workday of every month
-#MONTHLY, count=3, byweekday=(2TU) - second Tuesday of the month for 3 months
-#MONTHLY, count=6, byweekday=(1FR,-1FR) - first and last Friday of the month for 3 months
-#YEARLY, byeaster=-1, dtstart=parse("20000101T000000"), until=parse("20100101T000000") - 10 instances of day before easter
-#YEARLY, byeaster=0 - easters
-#YEARLY, byeaster=1 - day after easters
-#YEARLY, byyearday=(183) - mid year
-#YEARLY, byyearday=(-1) - last day of every year
-#YEARLY, byyearday=(1,365) - first and last (non-leap) day of every year
+DAILY, interval=4, dtstart=parse("_elapsed_") - a freshly completed _elapsed_ task that will not be added'                    
+DAILY, interval=2, count=9 - every other day for a total of 9
+WEEKLY, byweekday=(SU), count=8 - weekly on Sunday for a total of 8
+WEEKLY, byweekday=(MO), count=6 - weekly on Monday for a total of 6
+WEEKLY, byweekday=(WE), count=1 - first Wednesday in range
+WEEKLY, byweekday=(TH), count=1 - first Thursday in range
+WEEKLY, byweekday=(FR), count=1 - first Friday in range
+WEEKLY, byweekday=(SA), count=1 - first Saturday in range
+WEEKLY, byweekday=(SU,SA), count=4 - weekly on Sunday and Saturday for a total of 4
+WEEKLY, byweekday=(SU,MO,TU,WE,TH,FR,SA), bysetpos=6, count=5 - weekly on Friday for a total of 5
+WEEKLY, wkst=SU, byweekday=(SU), count=3 - no idea what wkst does, but I'm passing it
+WEEKLY, wkst=MO, byweekday=(SU), count=3 - no idea what wkst does, but I'm passing it
+WEEKLY, byweekday=(WE), byweekno=(1) - Wednesday in the first week of every year
+WEEKLY, byweekday=(TH), byweekno=(2,52) - Thursday in the second week and the 52nd week of every year
+MONTHLY, bymonth=(9) - every September 1 
+MONTHLY, bymonth=(10,11) - every October 1, November 1
+MONTHLY, bymonthday=(-1) - last day of every month
+MONTHLY, bymonthday=(2,3) - the 2nd and 3rd of every month
+MONTHLY, byweekday=(MO,TU,WE,TH,FR), bysetpos=-1 - last workday of every month
+MONTHLY, count=3, byweekday=(2TU) - second Tuesday of the month for 3 months
+MONTHLY, count=6, byweekday=(1FR,-1FR) - first and last Friday of the month for 3 months
+YEARLY, byeaster=-1, dtstart=parse("20000101T000000"), until=parse("20100101T000000") - 10 instances of day before easter
+YEARLY, byeaster=0 - easters
+YEARLY, byeaster=1 - day after easters
+YEARLY, byyearday=(183) - mid year
+YEARLY, byyearday=(-1) - last day of every year
+YEARLY, byyearday=(1,365) - first and last (non-leap) day of every year

@@ -54,7 +54,7 @@ import sys
 import time
 import todotxtio as basetodotxtio
 
-VERSION='2021-02-18 WIP'
+VERSION='2021-11-30'
 
 def check_schedule( schedstr, taskstr, cur_day):
                  
@@ -99,7 +99,6 @@ def check_schedule( schedstr, taskstr, cur_day):
             dtstart_str = re.search('"(.*)"', line).group(1)
             if (dtstart_str == "_elapsed_"):
                dtstart_str = get_dt_start_str_elapsed( taskstr )
-               print ("jhd... post call, dtstart_str = ", dtstart_str)
             scratch = 'DTSTART:%s\n' % dtstart_str
             schedstr_fmt = scratch + schedstr_fmt            
             if (not ((dtstart_str[0:7]).isnumeric()) and (
@@ -405,65 +404,27 @@ def get_dt_start_str_elapsed( taskstr ):
          len(taskstr_obj[0].projects[0])
       except:
          taskstr_obj[0].projects = []
-      
-      #print ("jhd... taskstr_obj[0].priority",    taskstr_obj[0].priority)
-      #print ("jhd... taskstr_obj[0].text",        taskstr_obj[0].text)
-      #print ("jhd... taskstr_obj[0].contexts[0]", taskstr_obj[0].contexts[0])
-      #print ("jhd... taskstr_obj[0].projects[0]", taskstr_obj[0].projects[0])
     
       # done_file was read into done_list in main
       for done_obj in done_list:
-      
-         #print ("jhd... taskstr_obj[0].text     ", taskstr_obj[0].text)
-         #print ("jhd... done_obj.text           ", done_obj.text)
-         #print ("jhd... done_obj.completion_date", done_obj.completion_date)
-         
+
          # in each case, task is a match if it is a subset of the done object
          # evaluate text      
          if taskstr_obj[0].text.strip() == done_obj.text.strip():  
-            
-            
-            
-            
-            print ("jhd... print match")
-            print ("jhd... set(taskstr_obj[0].projects).issubset(set(done_obj.projects)) = ",                                                set(taskstr_obj[0].projects).issubset(set(done_obj.projects)))
-            print ("jhd... left side")
-            for item in taskstr_obj[0].projects:
-               print ("jhd... taskstr project item: ", item)
-            print ("jhd... right side")
-            for item in done_obj.projects:
-               print ("jhd... done_obj project item: ", item)
-            for item in taskstr_obj[0].contexts:
-               print ("jhd... taskstr context item: ", item)
-            print ("jhd... right side")
-            for item in done_obj.contexts:
-               print ("jhd... done_obj context item: ", item)            
-            
-            
-            
-            print ("jhd... opts_ignore_projects = ", opts_ignore_projects)
-            
-            
+            set(taskstr_obj[0].projects).issubset(set(done_obj.projects))
             
             # evaluate projects
             if ((set(taskstr_obj[0].projects).issubset(set(done_obj.projects))) or opts_ignore_projects):
                 
-               print ("jhd... passed project test")
                # evaluate contexts
                if ((set(taskstr_obj[0].contexts).issubset(set(done_obj.contexts))) or opts_ignore_contexts):   
                
-                  print ("jhd... passed context test")
-                  print ("jhd... done_obj.completion_date     ", done_obj.completion_date)
-                  print ("jhd... date_latest                  ", date_latest)
-                  print ("jhd... dateutil.parser.parse(done_obj.completion_date) = ", dateutil.parser.parse(done_obj.completion_date))
-                  print ("jhd... dateutil.parser.parse(date_latest) = ", dateutil.parser.parse(date_latest))
                   if dateutil.parser.parse(done_obj.completion_date) > dateutil.parser.parse(date_latest):
                      date_latest = done_obj.completion_date
-                     print ("jhd... completion date = ", date_latest, " is now date_latest" )
 
       date_latest = date_latest.replace('-', '') + "T000000"
-      print ("jhd... date latest = ", date_latest)
       return date_latest
+
    except Exception as e:
       print("FAILURE, problem with get_dt_start_str_elapsed()")
       exception_cleanup(e)
@@ -511,6 +472,7 @@ byyearday=(x)                          multiple? seperate with commas
 count=x                                number of occurrences, mutually exclusive with until
 dtstart=parse("YYYYMMDDT000000")       YYYYMMDD is a formatted date, defaults to 20180101T000000 
 dtstart=parse("_elapsed_")             _elapsed_ is replaced with a formatted date, created from the newest completed in match in done.txt
+                                       no match in done.txt? becomes 20180101T000000 
 interval=x                             where x = 1 or more 
 until==parse("YYYYMMDDT000000")        YYYYMMDD is a formatted date, defaults to day after script runs
 wkst=SU | MO | TU | WE | TH | FR | SA  first two letters of the day, used to align byweekno   
@@ -732,7 +694,6 @@ try:
       print("Processing day...", cur_day)   
       
       for recur in recur_entries:
-         print("jhd... starting a new recur entry")
          # remove CRLF for prettier exception printing
          recur.replace('\n', ' ').replace('\r', '')
          scratch = recur.split(" - ", 1)
@@ -753,17 +714,17 @@ try:
                dupe_text = False
                if (todo_obj.text == taskstr_obj[0].text):
                   dupe_text = True
+
                # evaluate projects; is the taskstr a subset?
                dupe_projects = False
                if (set(taskstr_obj[0].projects).issubset(set(todo_obj.projects))):
                   dupe_projects = True        
+
                # evaluate contexts; is the taskstr a subset?
                dupe_contexts = False
                if (set(taskstr_obj[0].contexts).issubset(set(todo_obj.contexts))):
                   dupe_contexts = True                     
-               print("jhd... dupe_text = ", dupe_text)
-               print("jhd... dupe_projects = ", dupe_projects)
-               print("jhd... dupe_contexts = ", dupe_contexts)
+
                if (dupe_text):
                   if ((opts_ignore_projects and opts_ignore_contexts) or
                       ((not opts_ignore_projects) and (dupe_projects)) or
