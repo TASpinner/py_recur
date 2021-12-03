@@ -471,7 +471,7 @@ byweekno=(x)                           multiple? seperate with commas
 byyearday=(x)                          multiple? seperate with commas 
 count=x                                number of occurrences, mutually exclusive with until
 dtstart=parse("YYYYMMDDT000000")       YYYYMMDD is a formatted date, defaults to 20180101T000000 
-dtstart=parse("__elapsed__")           _elapsed_ is replaced with a formatted date, created from the newest completed in match in done.txt
+dtstart=parse("__elapsed__")           __elapsed__ is replaced with a formatted date, created from the newest completed in match in done.txt
                                        no match in done.txt? becomes 20180101T000000 
 interval=x                             where x = 1 or more 
 until==parse("YYYYMMDDT000000")        YYYYMMDD is a formatted date, defaults to day after script runs
