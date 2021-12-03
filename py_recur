@@ -54,7 +54,7 @@ import sys
 import time
 import todotxtio as basetodotxtio
 
-VERSION='2021-11-30'
+VERSION='2021-12-02'
 
 def check_schedule( schedstr, taskstr, cur_day):
                  
@@ -97,7 +97,7 @@ def check_schedule( schedstr, taskstr, cur_day):
          if "dtstart=parse" in line:
             dtstart_found = True
             dtstart_str = re.search('"(.*)"', line).group(1)
-            if (dtstart_str == "_elapsed_"):
+            if (dtstart_str == "__elapsed__"):
                dtstart_str = get_dt_start_str_elapsed( taskstr )
             scratch = 'DTSTART:%s\n' % dtstart_str
             schedstr_fmt = scratch + schedstr_fmt            
@@ -471,7 +471,7 @@ byweekno=(x)                           multiple? seperate with commas
 byyearday=(x)                          multiple? seperate with commas 
 count=x                                number of occurrences, mutually exclusive with until
 dtstart=parse("YYYYMMDDT000000")       YYYYMMDD is a formatted date, defaults to 20180101T000000 
-dtstart=parse("_elapsed_")             _elapsed_ is replaced with a formatted date, created from the newest completed in match in done.txt
+dtstart=parse("__elapsed__")           _elapsed_ is replaced with a formatted date, created from the newest completed in match in done.txt
                                        no match in done.txt? becomes 20180101T000000 
 interval=x                             where x = 1 or more 
 until==parse("YYYYMMDDT000000")        YYYYMMDD is a formatted date, defaults to day after script runs

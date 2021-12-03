@@ -1,4 +1,4 @@
-py_recur version 2021-11-30
+py_recur version 2021-12-02
 opts_test
 opts_override_input_rule = py_recur_verify.txt
 opts_override_input_task = todo_verify.txt
@@ -22,7 +22,7 @@ rule_list:
 - Recur matches 2020-12-30: DAILY, dtstart=parse("20201230T000000") - this does not have an entry in the todo_verify.txt and be added
     - No duplicate found for this does not have an entry in the todo_verify.txt and be added
     - Adding 2020-12-30 this does not have an entry in the todo_verify.txt and be added
-py_recur.txt entry:  DAILY, interval=2, dtstart=parse("_elapsed_") - _elapsed_, no done.txt entry and will be added
+py_recur.txt entry:  DAILY, interval=2, dtstart=parse("__elapsed__") - __elapsed__, no done.txt entry and will be added
 schedstr_fmt:  DTSTART:20180101T000000
 RRULE:FREQ=DAILY;INTERVAL=2;UNTIL=20201231T000000
 rule_list: 
@@ -574,24 +574,24 @@ rule_list:
 2020-12-26 00:00:00
 2020-12-28 00:00:00
 2020-12-30 00:00:00
-- Recur matches 2020-12-30: DAILY, interval=2, dtstart=parse("_elapsed_") - _elapsed_, no done.txt entry and will be added
-    - No duplicate found for _elapsed_, no done.txt entry and will be added
-    - Adding 2020-12-30 _elapsed_, no done.txt entry and will be added
-py_recur.txt entry:  DAILY, interval=4, dtstart=parse("_elapsed_") - _elapsed_, done.txt entry newer and will not be added
+- Recur matches 2020-12-30: DAILY, interval=2, dtstart=parse("__elapsed__") - __elapsed__, no done.txt entry and will be added
+    - No duplicate found for __elapsed__, no done.txt entry and will be added
+    - Adding 2020-12-30 __elapsed__, no done.txt entry and will be added
+py_recur.txt entry:  DAILY, interval=4, dtstart=parse("__elapsed__") - __elapsed__, done.txt entry newer and will not be added
 schedstr_fmt:  DTSTART:20201229T000000
 RRULE:FREQ=DAILY;INTERVAL=4;UNTIL=20201231T000000
 rule_list: 
 2020-12-29 00:00:00
-py_recur.txt entry:  DAILY, interval=4, dtstart=parse("_elapsed_") - _elapsed_, done.txt entry older and will be added
+py_recur.txt entry:  DAILY, interval=4, dtstart=parse("__elapsed__") - __elapsed__, done.txt entry older and will be added
 schedstr_fmt:  DTSTART:20201226T000000
 RRULE:FREQ=DAILY;INTERVAL=4;UNTIL=20201231T000000
 rule_list: 
 2020-12-26 00:00:00
 2020-12-30 00:00:00
-- Recur matches 2020-12-30: DAILY, interval=4, dtstart=parse("_elapsed_") - _elapsed_, done.txt entry older and will be added
-    - No duplicate found for _elapsed_, done.txt entry older and will be added
-    - Adding 2020-12-30 _elapsed_, done.txt entry older and will be added
-py_recur.txt entry:  DAILY, interval=4, dtstart=parse("_elapsed_") - a freshly completed _elapsed_ task that will not be added'                    
+- Recur matches 2020-12-30: DAILY, interval=4, dtstart=parse("__elapsed__") - __elapsed__, done.txt entry older and will be added
+    - No duplicate found for __elapsed__, done.txt entry older and will be added
+    - Adding 2020-12-30 __elapsed__, done.txt entry older and will be added
+py_recur.txt entry:  DAILY, interval=4, dtstart=parse("__elapsed__") - a freshly completed __elapsed__ task that will not be added'                    
 schedstr_fmt:  DTSTART:20180101T000000
 RRULE:FREQ=DAILY;INTERVAL=4;UNTIL=20201231T000000
 rule_list: 
@@ -1236,7 +1236,7 @@ rule_list:
 2021-01-01 00:00:00
 - Recur matches 2020-12-31: DAILY, dtstart=parse("20201230T000000") - this does not have an entry in the todo_verify.txt and be added
     - Duplicate task exists: this does not have an entry in the todo_verify.txt and be added
-py_recur.txt entry:  DAILY, interval=2, dtstart=parse("_elapsed_") - _elapsed_, no done.txt entry and will be added
+py_recur.txt entry:  DAILY, interval=2, dtstart=parse("__elapsed__") - __elapsed__, no done.txt entry and will be added
 schedstr_fmt:  DTSTART:20180101T000000
 RRULE:FREQ=DAILY;INTERVAL=2;UNTIL=20210101T000000
 rule_list: 
@@ -1789,18 +1789,18 @@ rule_list:
 2020-12-28 00:00:00
 2020-12-30 00:00:00
 2021-01-01 00:00:00
-py_recur.txt entry:  DAILY, interval=4, dtstart=parse("_elapsed_") - _elapsed_, done.txt entry newer and will not be added
+py_recur.txt entry:  DAILY, interval=4, dtstart=parse("__elapsed__") - __elapsed__, done.txt entry newer and will not be added
 schedstr_fmt:  DTSTART:20201229T000000
 RRULE:FREQ=DAILY;INTERVAL=4;UNTIL=20210101T000000
 rule_list: 
 2020-12-29 00:00:00
-py_recur.txt entry:  DAILY, interval=4, dtstart=parse("_elapsed_") - _elapsed_, done.txt entry older and will be added
+py_recur.txt entry:  DAILY, interval=4, dtstart=parse("__elapsed__") - __elapsed__, done.txt entry older and will be added
 schedstr_fmt:  DTSTART:20201226T000000
 RRULE:FREQ=DAILY;INTERVAL=4;UNTIL=20210101T000000
 rule_list: 
 2020-12-26 00:00:00
 2020-12-30 00:00:00
-py_recur.txt entry:  DAILY, interval=4, dtstart=parse("_elapsed_") - a freshly completed _elapsed_ task that will not be added'                    
+py_recur.txt entry:  DAILY, interval=4, dtstart=parse("__elapsed__") - a freshly completed __elapsed__ task that will not be added'                    
 schedstr_fmt:  DTSTART:20180101T000000
 RRULE:FREQ=DAILY;INTERVAL=4;UNTIL=20210101T000000
 rule_list: 
@@ -2440,8 +2440,8 @@ Here's the entries we're adding:
 
 
 2020-12-30 this does not have an entry in the todo_verify.txt and be added
-2020-12-30 _elapsed_, no done.txt entry and will be added
-2020-12-30 _elapsed_, done.txt entry older and will be added
+2020-12-30 __elapsed__, no done.txt entry and will be added
+2020-12-30 __elapsed__, done.txt entry older and will be added
 2020-12-30 first and last (non-leap) day of every year
 2020-12-30 last day of every month
 2020-12-30 last workday of every month

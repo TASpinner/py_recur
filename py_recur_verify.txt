@@ -5,10 +5,10 @@
 #
 DAILY, dtstart=parse("20201230T000000") - this will match a entry in the todo_verify.txt and not be added
 DAILY, dtstart=parse("20201230T000000") - this does not have an entry in the todo_verify.txt and be added
-DAILY, interval=2, dtstart=parse("_elapsed_") - _elapsed_, no done.txt entry and will be added
-DAILY, interval=4, dtstart=parse("_elapsed_") - _elapsed_, done.txt entry newer and will not be added
-DAILY, interval=4, dtstart=parse("_elapsed_") - _elapsed_, done.txt entry older and will be added
-DAILY, interval=4, dtstart=parse("_elapsed_") - a freshly completed _elapsed_ task that will not be added'                    
+DAILY, interval=2, dtstart=parse("__elapsed__") - __elapsed__, no done.txt entry and will be added
+DAILY, interval=4, dtstart=parse("__elapsed__") - __elapsed__, done.txt entry newer and will not be added
+DAILY, interval=4, dtstart=parse("__elapsed__") - __elapsed__, done.txt entry older and will be added
+DAILY, interval=4, dtstart=parse("__elapsed__") - a freshly completed __elapsed__ task that will not be added'                    
 DAILY, interval=2, count=9 - every other day for a total of 9
 WEEKLY, byweekday=(SU), count=8 - weekly on Sunday for a total of 8
 WEEKLY, byweekday=(MO), count=6 - weekly on Monday for a total of 6

@@ -11,12 +11,12 @@ echo 'x 2021-01-11 (A) 2021-01-04 test stripping in a completed task with priori
 echo 'x 2021-01-12 2021-01-05 test stripping in a completed task without a priority'        >> todo_verify.txt
 echo 'test stripping projects +project1 +project2 +project3'                                >> todo_verify.txt
 echo 'test stripping contexts @context1 @context2 @context3'                                >> todo_verify.txt
-echo 'x 2021-01-01 2020-12-31 a freshly completed _elapsed_ task that will not be added'    >> todo_verify.txt
+echo 'x 2021-01-01 2020-12-31 a freshly completed __elapsed__ task that will not be added'    >> todo_verify.txt
 #
 # two entries to be sure it grabs the newer of the two
-echo 'x 2020-12-28 _elapsed_, done.txt entry newer and will not be added' +test_added > done_verify.txt
-echo 'x 2020-12-29 _elapsed_, done.txt entry newer and will not be added' @test_added >> done_verify.txt
-echo 'x 2020-12-26 _elapsed_, done.txt entry older and will be added'     >> done_verify.txt
+echo 'x 2020-12-28 __elapsed__, done.txt entry newer and will not be added' +test_added > done_verify.txt
+echo 'x 2020-12-29 __elapsed__, done.txt entry newer and will not be added' @test_added >> done_verify.txt
+echo 'x 2020-12-26 __elapsed__, done.txt entry older and will be added'     >> done_verify.txt
 #
 echo
 echo Running tests on py_recur, writing console output to a file for comparison with a master file
